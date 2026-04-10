@@ -3,42 +3,48 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>TrackFlow | Request Information</title>
+	<title data-i18n="app.meta.title">TrackFlow | Request Information</title>
 	<meta name="description" content="Request logistics information from TrackFlow for warehousing, last-mile delivery, and reverse logistics services.">
 	<script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 text-slate-900 antialiased">
-	<a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-[#0f172a] focus:shadow-md">
+	<a href="#main-content" data-i18n="common.skip" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-[#0f172a] focus:shadow-md">
 		Skip to main content
 	</a>
 	<header id="home" role="banner" class="sticky top-0 z-50 border-b border-slate-700/60 bg-[#0f172a]/90 text-slate-100 backdrop-blur-md">
 		<div class="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-			<a href="index.html#home" class="text-2xl font-bold tracking-tight" aria-label="TrackFlow home">
+			<a href="index.html#home" data-i18n-aria-label="common.aria.homeLink" class="text-2xl font-bold tracking-tight" aria-label="TrackFlow home">
 				<span class="text-slate-100">Track</span><span class="text-[#f97316]">Flow</span>
 			</a>
-			<button
+			<div class="flex items-center gap-2 md:gap-3">
+				<button data-lang-toggle type="button" class="inline-flex items-center rounded-full bg-orange-700 px-3 py-1 text-xs font-semibold text-white transition hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-300">
+					ES
+				</button>
+				<button
 				id="menu-toggle"
 				type="button"
 				class="inline-flex items-center justify-center rounded-md border border-slate-600 px-3 py-2 text-xl text-slate-100 transition hover:border-[#f97316] hover:text-[#f97316] focus:outline-none focus:ring-2 focus:ring-orange-300 md:hidden"
+				data-i18n-aria-label="common.aria.toggleNav"
 				aria-label="Toggle navigation menu"
 				aria-controls="mobile-menu"
 				aria-expanded="false"
-			>
-				☰
-			</button>
-			<nav role="navigation" aria-label="Main navigation" class="hidden items-center gap-4 text-sm font-medium sm:gap-6 sm:text-base md:flex">
-				<a href="index.html#home" class="rounded-md px-2 py-1 transition hover:text-[#f97316]">Home</a>
-				<a href="index.html#services" class="rounded-md px-2 py-1 transition hover:text-[#f97316]">Services</a>
-				<a href="index.html#coverage" class="rounded-md px-2 py-1 transition hover:text-[#f97316]">Coverage</a>
-				<a href="index.html#contact" class="rounded-md px-2 py-1 transition hover:text-[#f97316]">Contact</a>
-			</nav>
+				>
+					☰
+				</button>
+				<nav role="navigation" data-i18n-aria-label="common.aria.mainNavigation" aria-label="Main navigation" class="hidden items-center gap-4 text-sm font-medium sm:gap-6 sm:text-base md:flex">
+					<a href="index.html#home" data-i18n="common.nav.home" class="rounded-md px-2 py-1 transition hover:text-[#f97316]">Home</a>
+					<a href="index.html#services" data-i18n="common.nav.services" class="rounded-md px-2 py-1 transition hover:text-[#f97316]">Services</a>
+					<a href="index.html#coverage" data-i18n="common.nav.coverage" class="rounded-md px-2 py-1 transition hover:text-[#f97316]">Coverage</a>
+					<a href="index.html#contact" data-i18n="common.nav.contact" class="rounded-md px-2 py-1 transition hover:text-[#f97316]">Contact</a>
+				</nav>
+			</div>
 		</div>
 		<div id="mobile-menu" class="hidden w-full border-t border-slate-700/60 bg-[#0f172a] md:hidden">
-			<nav role="navigation" aria-label="Main navigation" class="mx-auto flex w-full max-w-7xl flex-col px-4 py-3 sm:px-6">
-				<a href="index.html#home" class="rounded-md px-3 py-2 text-sm font-medium transition hover:text-[#f97316]">Home</a>
-				<a href="index.html#services" class="rounded-md px-3 py-2 text-sm font-medium transition hover:text-[#f97316]">Services</a>
-				<a href="index.html#coverage" class="rounded-md px-3 py-2 text-sm font-medium transition hover:text-[#f97316]">Coverage</a>
-				<a href="index.html#contact" class="rounded-md px-3 py-2 text-sm font-medium transition hover:text-[#f97316]">Contact</a>
+			<nav role="navigation" data-i18n-aria-label="common.aria.mainNavigation" aria-label="Main navigation" class="mx-auto flex w-full max-w-7xl flex-col px-4 py-3 sm:px-6">
+				<a href="index.html#home" data-i18n="common.nav.home" class="rounded-md px-3 py-2 text-sm font-medium transition hover:text-[#f97316]">Home</a>
+				<a href="index.html#services" data-i18n="common.nav.services" class="rounded-md px-3 py-2 text-sm font-medium transition hover:text-[#f97316]">Services</a>
+				<a href="index.html#coverage" data-i18n="common.nav.coverage" class="rounded-md px-3 py-2 text-sm font-medium transition hover:text-[#f97316]">Coverage</a>
+				<a href="index.html#contact" data-i18n="common.nav.contact" class="rounded-md px-3 py-2 text-sm font-medium transition hover:text-[#f97316]">Contact</a>
 			</nav>
 		</div>
 	</header>
@@ -46,13 +52,13 @@
 	<main id="main-content" role="main">
 		<section class="bg-[#0f172a] py-14 sm:py-16">
 			<div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-				<p class="inline-block rounded-full border border-orange-400/40 bg-orange-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-orange-300 sm:text-sm">
+				<p data-i18n="app.hero.badge" class="inline-block rounded-full border border-orange-400/40 bg-orange-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-orange-300 sm:text-sm">
 					TrackFlow Intake Form
 				</p>
-				<h1 class="mt-5 text-3xl font-extrabold leading-tight text-white sm:text-4xl md:text-5xl">
+				<h1 data-i18n="app.hero.title" class="mt-5 text-3xl font-extrabold leading-tight text-white sm:text-4xl md:text-5xl">
 					Request information for your logistics operation
 				</h1>
-				<p class="mt-4 max-w-3xl text-base leading-7 text-slate-200 sm:text-lg">
+				<p data-i18n="app.hero.subtitle" class="mt-4 max-w-3xl text-base leading-7 text-slate-200 sm:text-lg">
 					Tell us about your company, shipping profile, and service needs. Our team will respond with a tailored proposal for operations in the United States, Spain, or both.
 				</p>
 			</div>
@@ -61,133 +67,133 @@
 		<section class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
 			<form id="requestForm" novalidate class="rounded-2xl border border-slate-200 bg-white p-5 shadow-md sm:p-8">
 				<div class="mb-6 rounded-lg bg-orange-50 p-4 text-sm text-slate-700">
-					Fields marked with <span class="font-semibold text-red-600">*</span> are required.
+					<span data-i18n="app.form.requiredNote">Fields marked with * are required.</span>
 				</div>
 
 				<fieldset class="rounded-xl border border-slate-200 p-4 sm:p-6">
-					<legend class="px-2 text-base font-semibold text-[#0f172a]">Company info</legend>
+					<legend data-i18n="app.fs.company" class="px-2 text-base font-semibold text-[#0f172a]">Company info</legend>
 					<div class="mt-2 grid grid-cols-1 gap-5 md:grid-cols-2">
 						<div>
-							<label for="companyName" class="mb-2 block text-sm font-medium text-slate-700">Company name <span class="text-red-600">*</span></label>
-							<input id="companyName" name="companyName" type="text" required aria-required="true" aria-describedby="companyNameError" aria-invalid="false" minlength="2" class="field w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-[#f97316] focus:outline-none focus:ring-2 focus:ring-orange-200" placeholder="TrackFlow Retail Inc.">
-							<p class="mt-1 text-xs text-slate-500">Minimum 2 characters.</p>
+							<label for="companyName" class="mb-2 block text-sm font-medium text-slate-700"><span data-i18n="app.companyName.label">Company name</span> <span class="text-red-600">*</span></label>
+							<input id="companyName" name="companyName" type="text" required aria-required="true" aria-describedby="companyNameError" aria-invalid="false" minlength="2" data-i18n-placeholder="app.companyName.placeholder" class="field w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-[#f97316] focus:outline-none focus:ring-2 focus:ring-orange-200" placeholder="TrackFlow Retail Inc.">
+							<p data-i18n="app.companyName.hint" class="mt-1 text-xs text-slate-500">Minimum 2 characters.</p>
 							<p id="companyNameError" aria-live="polite" class="mt-1 hidden text-red-600 text-sm"></p>
 						</div>
 
 						<div>
-							<label for="contactPerson" class="mb-2 block text-sm font-medium text-slate-700">Contact person <span class="text-red-600">*</span></label>
-							<input id="contactPerson" name="contactPerson" type="text" required aria-required="true" aria-describedby="contactPersonError" aria-invalid="false" pattern="^\s*\S+\s+\S+.*$" class="field w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-[#f97316] focus:outline-none focus:ring-2 focus:ring-orange-200" placeholder="Alex Morgan">
-							<p class="mt-1 text-xs text-slate-500">Include first and last name.</p>
+							<label for="contactPerson" class="mb-2 block text-sm font-medium text-slate-700"><span data-i18n="app.contactPerson.label">Contact person</span> <span class="text-red-600">*</span></label>
+							<input id="contactPerson" name="contactPerson" type="text" required aria-required="true" aria-describedby="contactPersonError" aria-invalid="false" pattern="^\s*\S+\s+\S+.*$" data-i18n-placeholder="app.contactPerson.placeholder" class="field w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-[#f97316] focus:outline-none focus:ring-2 focus:ring-orange-200" placeholder="Alex Morgan">
+							<p data-i18n="app.contactPerson.hint" class="mt-1 text-xs text-slate-500">Include first and last name.</p>
 							<p id="contactPersonError" aria-live="polite" class="mt-1 hidden text-red-600 text-sm"></p>
 						</div>
 
 						<div>
-							<label for="corporateEmail" class="mb-2 block text-sm font-medium text-slate-700">Corporate email <span class="text-red-600">*</span></label>
-							<input id="corporateEmail" name="corporateEmail" type="email" required aria-required="true" aria-describedby="corporateEmailError" aria-invalid="false" class="field w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-[#f97316] focus:outline-none focus:ring-2 focus:ring-orange-200" placeholder="operations@company.com">
+							<label for="corporateEmail" class="mb-2 block text-sm font-medium text-slate-700"><span data-i18n="app.email.label">Corporate email</span> <span class="text-red-600">*</span></label>
+							<input id="corporateEmail" name="corporateEmail" type="email" required aria-required="true" aria-describedby="corporateEmailError" aria-invalid="false" data-i18n-placeholder="app.email.placeholder" class="field w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-[#f97316] focus:outline-none focus:ring-2 focus:ring-orange-200" placeholder="operations@company.com">
 							<p id="corporateEmailError" aria-live="polite" class="mt-1 hidden text-red-600 text-sm"></p>
 						</div>
 
 						<div>
-							<label for="phone" class="mb-2 block text-sm font-medium text-slate-700">Phone <span class="text-red-600">*</span></label>
-							<input id="phone" name="phone" type="tel" required aria-required="true" aria-describedby="phoneError" aria-invalid="false" pattern="^\+[1-9]\d{0,3}[\d\s().-]{5,}$" class="field w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-[#f97316] focus:outline-none focus:ring-2 focus:ring-orange-200" placeholder="+1 213 555 0147">
-							<p class="mt-1 text-xs text-slate-500">Must start with + and country code.</p>
+							<label for="phone" class="mb-2 block text-sm font-medium text-slate-700"><span data-i18n="app.phone.label">Phone</span> <span class="text-red-600">*</span></label>
+							<input id="phone" name="phone" type="tel" required aria-required="true" aria-describedby="phoneError" aria-invalid="false" pattern="^\+[1-9]\d{0,3}[\d\s().-]{5,}$" data-i18n-placeholder="app.phone.placeholder" class="field w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-[#f97316] focus:outline-none focus:ring-2 focus:ring-orange-200" placeholder="+1 213 555 0147">
+							<p data-i18n="app.phone.hint" class="mt-1 text-xs text-slate-500">Must start with + and country code.</p>
 							<p id="phoneError" aria-live="polite" class="mt-1 hidden text-red-600 text-sm"></p>
 						</div>
 
 						<div class="md:col-span-2">
-							<label for="website" class="mb-2 block text-sm font-medium text-slate-700">Company website</label>
-							<input id="website" name="website" type="url" aria-describedby="websiteError" aria-invalid="false" class="field w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-[#f97316] focus:outline-none focus:ring-2 focus:ring-orange-200" placeholder="https://yourcompany.com">
-							<p class="mt-1 text-xs text-slate-500">Optional. Must be a valid URL if provided.</p>
+							<label for="website" data-i18n="app.website.label" class="mb-2 block text-sm font-medium text-slate-700">Company website</label>
+							<input id="website" name="website" type="url" aria-describedby="websiteError" aria-invalid="false" data-i18n-placeholder="app.website.placeholder" class="field w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-[#f97316] focus:outline-none focus:ring-2 focus:ring-orange-200" placeholder="https://yourcompany.com">
+							<p data-i18n="app.website.hint" class="mt-1 text-xs text-slate-500">Optional. Must be a valid URL if provided.</p>
 							<p id="websiteError" aria-live="polite" class="mt-1 hidden text-red-600 text-sm"></p>
 						</div>
 					</div>
 				</fieldset>
 
 				<fieldset class="mt-6 rounded-xl border border-slate-200 p-4 sm:p-6">
-					<legend class="px-2 text-base font-semibold text-[#0f172a]">Logistics profile</legend>
+					<legend data-i18n="app.fs.logistics" class="px-2 text-base font-semibold text-[#0f172a]">Logistics profile</legend>
 					<div class="mt-2 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
 						<div>
-							<label for="operatingCountry" class="mb-2 block text-sm font-medium text-slate-700">Main operating country <span class="text-red-600">*</span></label>
+							<label for="operatingCountry" class="mb-2 block text-sm font-medium text-slate-700"><span data-i18n="app.country.label">Main operating country</span> <span class="text-red-600">*</span></label>
 							<select id="operatingCountry" name="operatingCountry" required aria-required="true" aria-describedby="operatingCountryError" aria-invalid="false" class="field w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-[#f97316] focus:outline-none focus:ring-2 focus:ring-orange-200">
-								<option value="">Select one option</option>
-								<option>United States</option>
-								<option>Spain</option>
-								<option>Both</option>
-								<option>Other</option>
+								<option value="" data-i18n="app.select.default">Select one option</option>
+								<option data-i18n="app.country.us">United States</option>
+								<option data-i18n="app.country.es">Spain</option>
+								<option data-i18n="app.country.both">Both</option>
+								<option data-i18n="app.country.other">Other</option>
 							</select>
 							<p id="operatingCountryError" aria-live="polite" class="mt-1 hidden text-red-600 text-sm"></p>
 						</div>
 
 						<div>
-							<label for="productType" class="mb-2 block text-sm font-medium text-slate-700">Product type <span class="text-red-600">*</span></label>
+							<label for="productType" class="mb-2 block text-sm font-medium text-slate-700"><span data-i18n="app.product.label">Product type</span> <span class="text-red-600">*</span></label>
 							<select id="productType" name="productType" required aria-required="true" aria-describedby="productTypeError" aria-invalid="false" class="field w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-[#f97316] focus:outline-none focus:ring-2 focus:ring-orange-200">
-								<option value="">Select one option</option>
-								<option>Fashion</option>
-								<option>Electronics</option>
-								<option>Cosmetics</option>
-								<option>Food</option>
-								<option>Other</option>
+								<option value="" data-i18n="app.select.default">Select one option</option>
+								<option data-i18n="app.product.fashion">Fashion</option>
+								<option data-i18n="app.product.electronics">Electronics</option>
+								<option data-i18n="app.product.cosmetics">Cosmetics</option>
+								<option data-i18n="app.product.food">Food</option>
+								<option data-i18n="app.product.other">Other</option>
 							</select>
 							<p id="productTypeError" aria-live="polite" class="mt-1 hidden text-red-600 text-sm"></p>
 						</div>
 
 						<div>
-							<label for="shippingVolume" class="mb-2 block text-sm font-medium text-slate-700">Estimated monthly shipping volume <span class="text-red-600">*</span></label>
+							<label for="shippingVolume" class="mb-2 block text-sm font-medium text-slate-700"><span data-i18n="app.volume.label">Estimated monthly shipping volume</span> <span class="text-red-600">*</span></label>
 							<select id="shippingVolume" name="shippingVolume" required aria-required="true" aria-describedby="shippingVolumeError" aria-invalid="false" class="field w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-[#f97316] focus:outline-none focus:ring-2 focus:ring-orange-200">
-								<option value="">Select one option</option>
-								<option>0-100</option>
-								<option>101-500</option>
-								<option>501-2000</option>
-								<option>2000+</option>
-								<option>Not sure</option>
+								<option value="" data-i18n="app.select.default">Select one option</option>
+								<option data-i18n="app.volume.0_100">0-100</option>
+								<option data-i18n="app.volume.101_500">101-500</option>
+								<option data-i18n="app.volume.501_2000">501-2000</option>
+								<option data-i18n="app.volume.2000_plus">2000+</option>
+								<option data-i18n="app.volume.notSure">Not sure</option>
 							</select>
 							<p id="shippingVolumeError" aria-live="polite" class="mt-1 hidden text-red-600 text-sm"></p>
 						</div>
 					</div>
 					<div id="lowVolumeWarning" class="mt-5 hidden rounded-md border border-yellow-300 bg-yellow-50 p-4 text-sm text-yellow-900">
-						<p>For volumes under 100 monthly shipments, our services might not be the most efficient solution. Are you sure you want to continue?</p>
+						<p data-i18n="app.lowVolume.warning">For volumes under 100 monthly shipments, our services might not be the most efficient solution. Are you sure you want to continue?</p>
 						<button id="confirmLowVolume" type="button" class="mt-3 inline-flex items-center rounded-md bg-yellow-400 px-4 py-2 font-semibold text-yellow-950 transition hover:bg-yellow-300">
-							Yes, continue
+							<span data-i18n="app.lowVolume.continue">Yes, continue</span>
 						</button>
 					</div>
 				</fieldset>
 
 				<fieldset class="mt-6 rounded-xl border border-slate-200 p-4 sm:p-6">
-					<legend class="px-2 text-base font-semibold text-[#0f172a]">Services</legend>
+					<legend data-i18n="app.fs.services" class="px-2 text-base font-semibold text-[#0f172a]">Services</legend>
 					<div class="mt-2 grid grid-cols-1 gap-6 md:grid-cols-2">
 						<div>
-							<p class="mb-2 text-sm font-medium text-slate-700">Services of interest <span class="text-red-600">*</span></p>
+							<p class="mb-2 text-sm font-medium text-slate-700"><span data-i18n="app.services.label">Services of interest</span> <span class="text-red-600">*</span></p>
 							<div id="servicesGroup" class="rounded-md border border-slate-200 p-3">
 								<label for="serviceWarehousing" class="mb-2 flex cursor-pointer items-center gap-3 text-sm text-slate-700">
 									<input id="serviceWarehousing" name="services" type="checkbox" value="Warehousing" aria-required="true" aria-describedby="servicesError" class="service-checkbox h-4 w-4 rounded border-slate-300 text-[#f97316] focus:ring-orange-200">
-									<span>Warehousing</span>
+									<span data-i18n="app.services.warehousing">Warehousing</span>
 								</label>
 								<label for="serviceLastMile" class="mb-2 flex cursor-pointer items-center gap-3 text-sm text-slate-700">
 									<input id="serviceLastMile" name="services" type="checkbox" value="Last mile" aria-required="true" aria-describedby="servicesError" class="service-checkbox h-4 w-4 rounded border-slate-300 text-[#f97316] focus:ring-orange-200">
-									<span>Last mile</span>
+									<span data-i18n="app.services.lastmile">Last mile</span>
 								</label>
 								<label for="serviceReverseLogistics" class="flex cursor-pointer items-center gap-3 text-sm text-slate-700">
 									<input id="serviceReverseLogistics" name="services" type="checkbox" value="Reverse logistics" aria-required="true" aria-describedby="servicesError" class="service-checkbox h-4 w-4 rounded border-slate-300 text-[#f97316] focus:ring-orange-200">
-									<span>Reverse logistics</span>
+									<span data-i18n="app.services.reverse">Reverse logistics</span>
 								</label>
 							</div>
 							<p id="servicesError" aria-live="polite" class="mt-2 hidden text-red-600 text-sm"></p>
 						</div>
 
 						<div>
-							<p class="mb-2 text-sm font-medium text-slate-700">Do you currently work with another 3PL? <span class="text-red-600">*</span></p>
+							<p class="mb-2 text-sm font-medium text-slate-700"><span data-i18n="app.threepl.label">Do you currently work with another 3PL?</span> <span class="text-red-600">*</span></p>
 							<div class="space-y-2 rounded-md border border-slate-200 p-3">
 								<label for="threeplYes" class="flex cursor-pointer items-center gap-3 text-sm text-slate-700">
 									<input id="threeplYes" name="threepl" type="radio" value="Yes" required aria-required="true" aria-describedby="threeplError" class="h-4 w-4 border-slate-300 text-[#f97316] focus:ring-orange-200">
-									<span>Yes</span>
+									<span data-i18n="app.threepl.yes">Yes</span>
 								</label>
 								<label for="threeplNo" class="flex cursor-pointer items-center gap-3 text-sm text-slate-700">
 									<input id="threeplNo" name="threepl" type="radio" value="No" required aria-required="true" aria-describedby="threeplError" class="h-4 w-4 border-slate-300 text-[#f97316] focus:ring-orange-200">
-									<span>No</span>
+									<span data-i18n="app.threepl.no">No</span>
 								</label>
 								<label for="threeplEvaluating" class="flex cursor-pointer items-center gap-3 text-sm text-slate-700">
 									<input id="threeplEvaluating" name="threepl" type="radio" value="Evaluating options" required aria-required="true" aria-describedby="threeplError" class="h-4 w-4 border-slate-300 text-[#f97316] focus:ring-orange-200">
-									<span>Evaluating options</span>
+									<span data-i18n="app.threepl.evaluating">Evaluating options</span>
 								</label>
 							</div>
 							<p id="threeplError" aria-live="polite" class="mt-2 hidden text-red-600 text-sm"></p>
@@ -196,11 +202,11 @@
 				</fieldset>
 
 				<fieldset class="mt-6 rounded-xl border border-slate-200 p-4 sm:p-6">
-					<legend class="px-2 text-base font-semibold text-[#0f172a]">Additional info</legend>
+					<legend data-i18n="app.fs.additional" class="px-2 text-base font-semibold text-[#0f172a]">Additional info</legend>
 					<div class="mt-2 grid grid-cols-1 gap-5">
 						<div>
-							<label for="comments" class="mb-2 block text-sm font-medium text-slate-700">Comments or specific needs</label>
-							<textarea id="comments" name="comments" maxlength="500" rows="5" aria-describedby="commentsError commentsCounter" aria-invalid="false" class="field w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-[#f97316] focus:outline-none focus:ring-2 focus:ring-orange-200" placeholder="Tell us your expected SLAs, seasonality, integrations, or special requirements."></textarea>
+							<label for="comments" data-i18n="app.comments.label" class="mb-2 block text-sm font-medium text-slate-700">Comments or specific needs</label>
+							<textarea id="comments" name="comments" maxlength="500" rows="5" aria-describedby="commentsError commentsCounter" aria-invalid="false" data-i18n-placeholder="app.comments.placeholder" class="field w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-[#f97316] focus:outline-none focus:ring-2 focus:ring-orange-200" placeholder="Tell us your expected SLAs, seasonality, integrations, or special requirements."></textarea>
 							<div class="mt-1 flex justify-end">
 								<span id="commentsCounter" class="text-xs text-slate-500">0 / 500 characters</span>
 							</div>
@@ -210,7 +216,7 @@
 						<div class="rounded-md border border-slate-200 p-3">
 							<label for="privacyPolicy" class="flex cursor-pointer items-start gap-3 text-sm text-slate-700">
 								<input id="privacyPolicy" name="privacyPolicy" type="checkbox" required aria-required="true" aria-describedby="privacyPolicyError" aria-invalid="false" class="field mt-0.5 h-4 w-4 rounded border-slate-300 text-[#f97316] focus:ring-orange-200">
-								<span>I accept the privacy policy <span class="text-red-600">*</span></span>
+								<span><span data-i18n="app.privacy.label">I accept the privacy policy</span> <span class="text-red-600">*</span></span>
 							</label>
 							<p id="privacyPolicyError" aria-live="polite" class="mt-2 hidden text-red-600 text-sm"></p>
 						</div>
@@ -218,19 +224,19 @@
 				</fieldset>
 
 				<div class="mt-8 flex flex-col gap-3 sm:flex-row">
-					<button type="submit" aria-label="Send request" class="inline-flex items-center justify-center rounded-md bg-orange-700 px-6 py-3 text-sm font-semibold text-white shadow-md transition duration-300 hover:-translate-y-0.5 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:ring-offset-2">
-						Send request
+					<button type="submit" data-i18n-aria-label="app.button.submit" aria-label="Send request" class="inline-flex items-center justify-center rounded-md bg-orange-700 px-6 py-3 text-sm font-semibold text-white shadow-md transition duration-300 hover:-translate-y-0.5 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:ring-offset-2">
+						<span data-i18n="app.button.submit">Send request</span>
 					</button>
-					<button type="reset" aria-label="Clear form" class="inline-flex items-center justify-center rounded-md bg-slate-200 px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2">
-						Clear form
+					<button type="reset" data-i18n-aria-label="app.button.reset" aria-label="Clear form" class="inline-flex items-center justify-center rounded-md bg-slate-200 px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2">
+						<span data-i18n="app.button.reset">Clear form</span>
 					</button>
 				</div>
 			</form>
 			<div id="successMessage" class="hidden rounded-2xl border border-green-200 bg-green-50 p-6 text-green-900 shadow-md sm:p-8">
-				<h2 class="text-xl font-bold">Thank you for your interest in TrackFlow!</h2>
+				<h2 data-i18n="app.success.title" class="text-xl font-bold">Thank you for your interest in TrackFlow!</h2>
 				<p class="mt-3 text-base leading-7 sm:text-lg">
-					We have received your request. Our commercial team will review your information and contact you within the next 24-48 hours to schedule a call. If you have any urgent inquiry, write to us directly at
-					<a href="mailto:comercial@trackflow.com" class="font-semibold text-orange-700 hover:text-orange-600">comercial@trackflow.com</a>.
+					<span data-i18n="app.success.bodyPrefix">We have received your request. Our commercial team will review your information and contact you within the next 24-48 hours to schedule a call and learn about your logistics needs in detail. If you have any urgent inquiry, write to us directly at</span>
+					<a href="mailto:comercial@trackflow.com" class="font-semibold text-orange-700 hover:text-orange-600">comercial@trackflow.com</a><span data-i18n="app.success.bodySuffix">.</span>
 				</p>
 			</div>
 		</section>
@@ -238,13 +244,14 @@
 
 	<footer role="contentinfo" class="bg-[#0f172a] py-8">
 		<div class="mx-auto flex w-full max-w-7xl flex-col items-center justify-center gap-3 px-4 text-center text-sm text-white sm:px-6 lg:px-8">
-			<p>&copy; 2025 TrackFlow. All rights reserved.</p>
-			<a href="https://linkedin.com/company/trackflow" target="_blank" rel="noopener noreferrer" class="font-medium text-orange-300 transition hover:text-[#f97316]">
+			<p data-i18n="common.footer.copyright">&copy; 2025 TrackFlow. All rights reserved.</p>
+			<a href="https://linkedin.com/company/trackflow" target="_blank" rel="noopener noreferrer" data-i18n="common.footer.linkedin" class="font-medium text-orange-300 transition hover:text-[#f97316]">
 				LinkedIn
 			</a>
 		</div>
 	</footer>
 
+	<script src="i18n.js"></script>
 	<script>
 		document.addEventListener("DOMContentLoaded", function () {
 			var menuToggle = document.getElementById("menu-toggle");

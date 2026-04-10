@@ -12,57 +12,65 @@ document.addEventListener("DOMContentLoaded", function () {
 	var servicesGroup = document.getElementById("servicesGroup");
 	var servicesError = document.getElementById("servicesError");
 	var threeplError = document.getElementById("threeplError");
+	var i18n = window.TrackFlowI18n;
+
+	function t(key, vars) {
+		if (i18n && typeof i18n.t === "function") {
+			return i18n.t(key, vars);
+		}
+		return key;
+	}
 
 	var fieldMap = {
 		companyName: {
 			element: document.getElementById("companyName"),
 			error: document.getElementById("companyNameError"),
-			message: "Company name must have at least 2 characters"
+			messageKey: "validation.companyName"
 		},
 		contactPerson: {
 			element: document.getElementById("contactPerson"),
 			error: document.getElementById("contactPersonError"),
-			message: "Enter first and last name of contact"
+			messageKey: "validation.contactPerson"
 		},
 		corporateEmail: {
 			element: document.getElementById("corporateEmail"),
 			error: document.getElementById("corporateEmailError"),
-			message: "Enter a valid corporate email (example: name@company.com)"
+			messageKey: "validation.email"
 		},
 		phone: {
 			element: document.getElementById("phone"),
 			error: document.getElementById("phoneError"),
-			message: "Phone must include country code (example: +1 213 555 0147)"
+			messageKey: "validation.phone"
 		},
 		website: {
 			element: document.getElementById("website"),
 			error: document.getElementById("websiteError"),
-			message: "If you include website, it must be a valid URL"
+			messageKey: "validation.website"
 		},
 		operatingCountry: {
 			element: document.getElementById("operatingCountry"),
 			error: document.getElementById("operatingCountryError"),
-			message: "Select main operating country"
+			messageKey: "validation.country"
 		},
 		productType: {
 			element: document.getElementById("productType"),
 			error: document.getElementById("productTypeError"),
-			message: "Select the type of product you handle"
+			messageKey: "validation.product"
 		},
 		shippingVolume: {
 			element: document.getElementById("shippingVolume"),
 			error: document.getElementById("shippingVolumeError"),
-			message: "Select estimated monthly volume"
+			messageKey: "validation.volume"
 		},
 		comments: {
 			element: document.getElementById("comments"),
 			error: document.getElementById("commentsError"),
-			message: "Comments cannot exceed 500 characters"
+			messageKey: "validation.comments"
 		},
 		privacyPolicy: {
 			element: document.getElementById("privacyPolicy"),
 			error: document.getElementById("privacyPolicyError"),
-			message: "You must accept the privacy policy to continue"
+			messageKey: "validation.privacy"
 		}
 	};
 
@@ -102,7 +110,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		var value = fieldMap.companyName.element.value.trim();
 		if (value.length < 2) {
 			setErrorState(fieldMap.companyName.element);
-			showError(fieldMap.companyName.error, fieldMap.companyName.message);
+			showError(fieldMap.companyName.error, t(fieldMap.companyName.messageKey));
 			return false;
 		}
 		setValidState(fieldMap.companyName.element);
@@ -115,7 +123,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		var words = value.split(/\s+/).filter(Boolean);
 		if (words.length < 2) {
 			setErrorState(fieldMap.contactPerson.element);
-			showError(fieldMap.contactPerson.error, fieldMap.contactPerson.message);
+			showError(fieldMap.contactPerson.error, t(fieldMap.contactPerson.messageKey));
 			return false;
 		}
 		setValidState(fieldMap.contactPerson.element);
@@ -128,7 +136,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!emailRegex.test(value)) {
 			setErrorState(fieldMap.corporateEmail.element);
-			showError(fieldMap.corporateEmail.error, fieldMap.corporateEmail.message);
+			showError(fieldMap.corporateEmail.error, t(fieldMap.corporateEmail.messageKey));
 			return false;
 		}
 		setValidState(fieldMap.corporateEmail.element);
@@ -140,7 +148,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		var value = fieldMap.phone.element.value.trim();
 		if (!/^\+[\d\s().-]+$/.test(value)) {
 			setErrorState(fieldMap.phone.element);
-			showError(fieldMap.phone.error, fieldMap.phone.message);
+			showError(fieldMap.phone.error, t(fieldMap.phone.messageKey));
 			return false;
 		}
 		setValidState(fieldMap.phone.element);
@@ -157,14 +165,14 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 		if (!/^https?:\/\//i.test(value)) {
 			setErrorState(fieldMap.website.element);
-			showError(fieldMap.website.error, fieldMap.website.message);
+			showError(fieldMap.website.error, t(fieldMap.website.messageKey));
 			return false;
 		}
 		try {
 			new URL(value);
 		} catch (error) {
 			setErrorState(fieldMap.website.element);
-			showError(fieldMap.website.error, fieldMap.website.message);
+			showError(fieldMap.website.error, t(fieldMap.website.messageKey));
 			return false;
 		}
 		setValidState(fieldMap.website.element);
@@ -176,7 +184,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		var item = fieldMap[fieldKey];
 		if (!item.element.value) {
 			setErrorState(item.element);
-			showError(item.error, item.message);
+			showError(item.error, t(item.messageKey));
 			return false;
 		}
 		setValidState(item.element);
@@ -186,10 +194,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	function validateComments() {
 		var length = fieldMap.comments.element.value.length;
-		commentsCounter.textContent = length + " / 500 characters";
+		commentsCounter.textContent = t("validation.counter", { count: length });
 		if (length > 500) {
 			setErrorState(fieldMap.comments.element);
-			showError(fieldMap.comments.error, fieldMap.comments.message);
+			showError(fieldMap.comments.error, t(fieldMap.comments.messageKey, { remaining: Math.max(0, 500 - length) }));
 			return false;
 		}
 		if (length === 0) {
@@ -204,7 +212,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	function validatePrivacyPolicy() {
 		if (!fieldMap.privacyPolicy.element.checked) {
 			setErrorState(fieldMap.privacyPolicy.element);
-			showError(fieldMap.privacyPolicy.error, fieldMap.privacyPolicy.message);
+			showError(fieldMap.privacyPolicy.error, t(fieldMap.privacyPolicy.messageKey));
 			return false;
 		}
 		setValidState(fieldMap.privacyPolicy.element);
@@ -222,7 +230,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		servicesGroup.classList.remove("border-slate-200", "border-red-500", "border-green-500");
 		if (!hasSelection) {
 			servicesGroup.classList.add("border-red-500");
-			showError(servicesError, "Select at least one service of interest");
+			showError(servicesError, t("validation.services"));
 			return false;
 		}
 		servicesGroup.classList.add("border-green-500");
@@ -238,7 +246,7 @@ document.addEventListener("DOMContentLoaded", function () {
 			radio.setAttribute("aria-invalid", checked ? "false" : "true");
 		});
 		if (!checked) {
-			showError(threeplError, "Indicate if you currently work with another logistics provider");
+			showError(threeplError, t("validation.threepl"));
 			return false;
 		}
 		hideError(threeplError);
@@ -290,9 +298,30 @@ document.addEventListener("DOMContentLoaded", function () {
 		});
 		hideError(servicesError);
 		hideError(threeplError);
-		commentsCounter.textContent = "0 / 500 characters";
+		commentsCounter.textContent = t("validation.counter", { count: 0 });
 		lowVolumeWarning.classList.add("hidden");
 		lowVolumeConfirmed = false;
+	}
+
+	function refreshVisibleMessages() {
+		Object.keys(fieldMap).forEach(function (key) {
+			var item = fieldMap[key];
+			if (!item.error.classList.contains("hidden")) {
+				if (key === "comments") {
+					showError(item.error, t(item.messageKey, { remaining: Math.max(0, 500 - item.element.value.length) }));
+				} else {
+					showError(item.error, t(item.messageKey));
+				}
+			}
+		});
+
+		if (!servicesError.classList.contains("hidden")) {
+			showError(servicesError, t("validation.services"));
+		}
+		if (!threeplError.classList.contains("hidden")) {
+			showError(threeplError, t("validation.threepl"));
+		}
+		commentsCounter.textContent = t("validation.counter", { count: fieldMap.comments.element.value.length });
 	}
 
 	fieldMap.companyName.element.addEventListener("blur", validateCompanyName);
@@ -383,5 +412,9 @@ document.addEventListener("DOMContentLoaded", function () {
 		setTimeout(function () {
 			clearAllValidationStates();
 		}, 0);
+	});
+
+	document.addEventListener("trackflow:language-changed", function () {
+		refreshVisibleMessages();
 	});
 });
