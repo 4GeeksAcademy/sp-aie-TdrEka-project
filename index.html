@@ -52,11 +52,29 @@
 			<a href="#home" class="text-2xl font-bold tracking-tight" aria-label="TrackFlow home">
 				<span class="text-slate-100">Track</span><span class="text-[#f97316]">Flow</span>
 			</a>
-			<nav role="navigation" aria-label="Main navigation" class="flex flex-wrap items-center gap-4 text-sm font-medium sm:gap-6 sm:text-base">
+			<button
+				id="menu-toggle"
+				type="button"
+				class="inline-flex items-center justify-center rounded-md border border-slate-600 px-3 py-2 text-xl text-slate-100 transition hover:border-[#f97316] hover:text-[#f97316] focus:outline-none focus:ring-2 focus:ring-orange-300 md:hidden"
+				aria-label="Toggle navigation menu"
+				aria-controls="mobile-menu"
+				aria-expanded="false"
+			>
+				☰
+			</button>
+			<nav role="navigation" aria-label="Main navigation" class="hidden items-center gap-4 text-sm font-medium sm:gap-6 sm:text-base md:flex">
 				<a href="#home" data-nav-link class="rounded-md border border-orange-400/30 bg-orange-500/10 px-2 py-1 text-[#f97316] transition hover:text-[#f97316]">Home</a>
 				<a href="#services" data-nav-link class="rounded-md px-2 py-1 transition hover:text-[#f97316]">Services</a>
 				<a href="#coverage" data-nav-link class="rounded-md px-2 py-1 transition hover:text-[#f97316]">Coverage</a>
 				<a href="#contact" data-nav-link class="rounded-md px-2 py-1 transition hover:text-[#f97316]">Contact</a>
+			</nav>
+		</div>
+		<div id="mobile-menu" class="hidden w-full border-t border-slate-700/60 bg-[#0f172a] md:hidden">
+			<nav role="navigation" aria-label="Main navigation" class="mx-auto flex w-full max-w-7xl flex-col px-4 py-3 sm:px-6">
+				<a href="#home" data-nav-link class="rounded-md px-3 py-2 text-sm font-medium transition hover:text-[#f97316]">Home</a>
+				<a href="#services" data-nav-link class="rounded-md px-3 py-2 text-sm font-medium transition hover:text-[#f97316]">Services</a>
+				<a href="#coverage" data-nav-link class="rounded-md px-3 py-2 text-sm font-medium transition hover:text-[#f97316]">Coverage</a>
+				<a href="#contact" data-nav-link class="rounded-md px-3 py-2 text-sm font-medium transition hover:text-[#f97316]">Contact</a>
 			</nav>
 		</div>
 	</header>
@@ -250,8 +268,28 @@
 
 	<script>
 		document.addEventListener("DOMContentLoaded", function () {
+			var menuToggle = document.getElementById("menu-toggle");
+			var mobileMenu = document.getElementById("mobile-menu");
+			var mobileMenuLinks = mobileMenu.querySelectorAll("a");
 			var navLinks = document.querySelectorAll("[data-nav-link]");
 			var sections = ["home", "services", "coverage", "contact"];
+
+			function toggleMenu(forceClose) {
+				var isOpen = !mobileMenu.classList.contains("hidden");
+				var shouldOpen = forceClose ? false : !isOpen;
+				mobileMenu.classList.toggle("hidden", !shouldOpen);
+				menuToggle.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
+			}
+
+			menuToggle.addEventListener("click", function () {
+				toggleMenu(false);
+			});
+
+			mobileMenuLinks.forEach(function (link) {
+				link.addEventListener("click", function () {
+					toggleMenu(true);
+				});
+			});
 
 			function setActiveLink(activeId) {
 				navLinks.forEach(function (link) {
