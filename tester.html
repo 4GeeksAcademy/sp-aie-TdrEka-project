@@ -1,0 +1,1389 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TrackFlow Data Tester</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 text-slate-900 antialiased">
+  <a
+    href="#main-content"
+    class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[70] focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-[#0f172a]"
+  >
+    Skip to main content
+  </a>
+
+  <header class="sticky top-0 z-50 border-b border-slate-700/60 bg-[#0f172a] text-white shadow-lg">
+    <div class="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+      <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-lg border border-orange-300/30 bg-orange-500/10">
+          <span class="text-xl" aria-hidden="true">📦</span>
+        </div>
+        <div>
+          <p class="text-xl font-extrabold tracking-tight">
+            <span class="text-slate-100">Track</span><span class="text-[#f97316]">Flow</span>
+          </p>
+          <p class="text-xs text-slate-300">TrackFlow Data Tester</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a
+          href="index.html"
+          aria-label="Back to TrackFlow homepage"
+          class="rounded-md border border-orange-400/40 bg-orange-500/10 px-3 py-2 text-sm font-semibold text-orange-200 transition hover:bg-orange-500/20"
+        >
+          ← Back to site
+        </a>
+        <button
+          id="tabs-menu-toggle"
+          type="button"
+          aria-label="Toggle tester tabs menu"
+          aria-controls="tabs-mobile-menu"
+          aria-expanded="false"
+          class="inline-flex items-center justify-center rounded-md border border-slate-500 px-3 py-2 text-lg text-white transition hover:border-[#f97316] hover:text-[#f97316] md:hidden"
+        >
+          ☰
+        </button>
+      </div>
+    </div>
+
+    <nav class="hidden border-t border-slate-700/60 md:block" aria-label="Tester tabs navigation">
+      <div class="mx-auto flex w-full max-w-7xl gap-2 px-4 py-3 sm:px-6 lg:px-8" id="tabs-desktop"></div>
+    </nav>
+
+    <nav
+      id="tabs-mobile-menu"
+      class="hidden border-t border-slate-700/60 bg-[#0f172a] md:hidden"
+      aria-label="Tester tabs mobile navigation"
+    >
+      <div class="mx-auto flex w-full max-w-7xl flex-col px-4 py-3 sm:px-6" id="tabs-mobile"></div>
+    </nav>
+  </header>
+
+  <main id="main-content" class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <section id="tab-inventory" class="tab-panel space-y-5" aria-label="Inventory tab panel"></section>
+    <section id="tab-carriers" class="tab-panel hidden space-y-5" aria-label="Carrier scoring tab panel"></section>
+    <section id="tab-reports" class="tab-panel hidden space-y-5" aria-label="Reports tab panel"></section>
+    <section id="tab-validations" class="tab-panel hidden space-y-5" aria-label="Validations tab panel"></section>
+  </main>
+
+  <script>
+    // -------------------------------
+    // Data models and sample data
+    // -------------------------------
+
+    const sampleProducts = [
+      {
+        sku: "SHOE-BLK-42",
+        name: "Black Running Shoes - Size 42",
+        category: "Fashion",
+        weightKg: 0.8,
+        dimensions: { lengthCm: 35, widthCm: 22, heightCm: 12 },
+        warehouse: "Los Angeles",
+        stockQuantity: 45,
+        minStockThreshold: 20,
+        unitCostUSD: 35.0,
+        isFragile: false,
+        status: "Active",
+      },
+      {
+        sku: "LAPTOP-DELL-15",
+        name: "Dell Laptop 15 inch",
+        category: "Electronics",
+        weightKg: 2.3,
+        dimensions: { lengthCm: 40, widthCm: 28, heightCm: 3 },
+        warehouse: "Zaragoza",
+        stockQuantity: 8,
+        minStockThreshold: 10,
+        unitCostUSD: 650.0,
+        isFragile: true,
+        status: "Low stock",
+      },
+      {
+        sku: "PERFUME-COCO-50",
+        name: "Coco Perfume 50ml",
+        category: "Cosmetics",
+        weightKg: 0.3,
+        dimensions: { lengthCm: 12, widthCm: 8, heightCm: 15 },
+        warehouse: "Los Angeles",
+        stockQuantity: 120,
+        minStockThreshold: 30,
+        unitCostUSD: 85.0,
+        isFragile: true,
+        status: "Active",
+      },
+      {
+        sku: "LAMP-WOOD-01",
+        name: "Wooden Table Lamp",
+        category: "Home",
+        weightKg: 1.9,
+        dimensions: { lengthCm: 28, widthCm: 28, heightCm: 45 },
+        warehouse: "Zaragoza",
+        stockQuantity: 3,
+        minStockThreshold: 6,
+        unitCostUSD: 42.5,
+        isFragile: true,
+        status: "Low stock",
+      },
+      {
+        sku: "MISC-KIT-99",
+        name: "Utility Starter Kit",
+        category: "Other",
+        weightKg: 1.1,
+        dimensions: { lengthCm: 20, widthCm: 15, heightCm: 10 },
+        warehouse: "Los Angeles",
+        stockQuantity: 60,
+        minStockThreshold: 15,
+        unitCostUSD: 19.99,
+        isFragile: false,
+        status: "Active",
+      },
+    ];
+
+    const sampleCarriers = [
+      {
+        id: "CAR-UPS",
+        name: "UPS",
+        operatesIn: ["United States"],
+        baseRateUSD: 5.0,
+        ratePerKgUSD: 1.2,
+        ratePerKmUSD: 0.05,
+        avgDeliveryDays: 3,
+        onTimeRate: 88,
+        maxWeightKg: 30,
+        handlesFragile: true,
+        acceptsPriority: ["Standard", "Express"],
+      },
+      {
+        id: "CAR-SEUR",
+        name: "SEUR",
+        operatesIn: ["Spain"],
+        baseRateUSD: 6.5,
+        ratePerKgUSD: 1.5,
+        ratePerKmUSD: 0.08,
+        avgDeliveryDays: 2,
+        onTimeRate: 92,
+        maxWeightKg: 25,
+        handlesFragile: true,
+        acceptsPriority: ["Standard", "Express", "Same-day"],
+      },
+      {
+        id: "CAR-DHL",
+        name: "DHL Express",
+        operatesIn: ["United States", "Spain"],
+        baseRateUSD: 12.0,
+        ratePerKgUSD: 2.0,
+        ratePerKmUSD: 0.1,
+        avgDeliveryDays: 1,
+        onTimeRate: 95,
+        maxWeightKg: 50,
+        handlesFragile: true,
+        acceptsPriority: ["Express", "Same-day"],
+      },
+    ];
+
+    const sampleShipment = {
+      id: "SH-2024-8821",
+      sku: "LAPTOP-DELL-15",
+      quantity: 1,
+      origin: "Zaragoza",
+      destination: {
+        city: "Madrid",
+        country: "Spain",
+        postalCode: "28001",
+        distanceKm: 320,
+      },
+      priority: "Express",
+      declaredValueUSD: 650.0,
+      carrier: null,
+      status: "Pending",
+      createdAt: new Date("2024-03-15"),
+    };
+
+    const additionalShipments = [
+      {
+        id: "SH-2024-8822",
+        sku: "SHOE-BLK-42",
+        quantity: 2,
+        origin: "Los Angeles",
+        destination: {
+          city: "San Diego",
+          country: "United States",
+          postalCode: "92101",
+          distanceKm: 195,
+        },
+        priority: "Standard",
+        declaredValueUSD: 70.0,
+        carrier: "UPS",
+        status: "Delivered",
+        createdAt: new Date("2024-03-16"),
+      },
+      {
+        id: "SH-2024-8823",
+        sku: "PERFUME-COCO-50",
+        quantity: 1,
+        origin: "Los Angeles",
+        destination: {
+          city: "Barcelona",
+          country: "Spain",
+          postalCode: "08001",
+          distanceKm: 6120,
+        },
+        priority: "Express",
+        declaredValueUSD: 85.0,
+        carrier: "DHL Express",
+        status: "In transit",
+        createdAt: new Date("2024-03-17"),
+      },
+    ];
+
+    const allShipments = [sampleShipment, ...additionalShipments];
+
+    const inventoryMovements = [
+      {
+        id: "MOV-001",
+        sku: "LAPTOP-DELL-15",
+        warehouse: "Zaragoza",
+        type: "Inbound",
+        quantity: 20,
+        reason: "Supplier restock",
+        timestamp: new Date("2024-03-10T09:00:00Z"),
+      },
+      {
+        id: "MOV-002",
+        sku: "LAPTOP-DELL-15",
+        warehouse: "Zaragoza",
+        type: "Outbound",
+        quantity: 8,
+        reason: "Customer orders",
+        timestamp: new Date("2024-03-14T12:30:00Z"),
+      },
+      {
+        id: "MOV-003",
+        sku: "LAPTOP-DELL-15",
+        warehouse: "Zaragoza",
+        type: "Adjustment",
+        quantity: 1,
+        reason: "Cycle count correction",
+        timestamp: new Date("2024-03-15T18:45:00Z"),
+      },
+    ];
+
+    const sampleMovements = [
+      {
+        id: "MOV-001",
+        sku: "LAPTOP-DELL-15",
+        warehouse: "Zaragoza",
+        type: "Inbound",
+        quantity: 15,
+        reason: "Restock from supplier",
+        timestamp: new Date("2024-03-10"),
+      },
+      {
+        id: "MOV-002",
+        sku: "LAPTOP-DELL-15",
+        warehouse: "Zaragoza",
+        type: "Outbound",
+        quantity: 3,
+        reason: "Order fulfillment",
+        timestamp: new Date("2024-03-12"),
+      },
+      {
+        id: "MOV-003",
+        sku: "SHOE-BLK-42",
+        warehouse: "Los Angeles",
+        type: "Adjustment",
+        quantity: 40,
+        reason: "Stock count correction",
+        timestamp: new Date("2024-03-14"),
+      },
+    ];
+
+    const allMovements = [...inventoryMovements, ...sampleMovements];
+
+    // -------------------------------
+    // Collections utilities
+    // -------------------------------
+
+    function filterProductsByWarehouse(products, warehouse) {
+      return products.filter((product) => product.warehouse === warehouse);
+    }
+
+    function filterProductsByCategory(products, category) {
+      return products.filter((product) => product.category === category);
+    }
+
+    function filterLowStockProducts(products) {
+      return products.filter(
+        (product) => product.stockQuantity <= product.minStockThreshold
+      );
+    }
+
+    function sortProductsByStock(products, order) {
+      const direction = order === "asc" ? 1 : -1;
+      return [...products].sort(
+        (a, b) => (a.stockQuantity - b.stockQuantity) * direction
+      );
+    }
+
+    function sortCarriersByReliability(carriers, order) {
+      const direction = order === "asc" ? 1 : -1;
+      return [...carriers].sort((a, b) => (a.onTimeRate - b.onTimeRate) * direction);
+    }
+
+    // -------------------------------
+    // Search utilities
+    // -------------------------------
+
+    function findProductBySKU(products, sku) {
+      if (products.length === 0) {
+        return null;
+      }
+
+      const normalizedSku = sku.toLowerCase();
+
+      for (const product of products) {
+        if (product.sku.toLowerCase() === normalizedSku) {
+          return product;
+        }
+      }
+
+      return null;
+    }
+
+    function findShipmentById(shipments, id) {
+      if (shipments.length === 0) {
+        return null;
+      }
+
+      for (const shipment of shipments) {
+        if (shipment.id === id) {
+          return shipment;
+        }
+      }
+
+      return null;
+    }
+
+    function binarySearchProductByWeight(sortedProducts, targetWeight) {
+      if (sortedProducts.length === 0) {
+        return -1;
+      }
+
+      let left = 0;
+      let right = sortedProducts.length - 1;
+
+      while (left <= right) {
+        const mid = Math.floor((left + right) / 2);
+        const midWeight = sortedProducts[mid].weightKg;
+
+        if (midWeight === targetWeight) {
+          return mid;
+        }
+
+        if (midWeight < targetWeight) {
+          left = mid + 1;
+        } else {
+          right = mid - 1;
+        }
+      }
+
+      return -1;
+    }
+
+    // -------------------------------
+    // Transformation utilities
+    // -------------------------------
+
+    const PRODUCT_CATEGORIES = ["Fashion", "Electronics", "Cosmetics", "Home", "Other"];
+    const SHIPMENT_STATUSES = ["Pending", "Assigned", "In transit", "Delivered", "Failed"];
+
+    function calculateShippingCost(shipment, product, carrier) {
+      const base = carrier.baseRateUSD;
+      const weightCost = product.weightKg * carrier.ratePerKgUSD * shipment.quantity;
+      const distanceCost = shipment.destination.distanceKm * carrier.ratePerKmUSD;
+      const subtotal = base + weightCost + distanceCost;
+
+      const surchargeMultiplier =
+        shipment.priority === "Express"
+          ? 1.3
+          : shipment.priority === "Same-day"
+            ? 1.6
+            : 1;
+
+      const total = subtotal * surchargeMultiplier;
+      return Math.round(total * 100) / 100;
+    }
+
+    function scoreCarrierForShipment(carrier, shipment, product) {
+      const operatesScore = carrier.operatesIn.includes(shipment.destination.country) ? 20 : 0;
+      const totalWeight = product.weightKg * shipment.quantity;
+      const weightScore = totalWeight <= carrier.maxWeightKg ? 20 : 0;
+      const priorityScore = carrier.acceptsPriority.includes(shipment.priority) ? 15 : 0;
+      const fragileScore = !product.isFragile || carrier.handlesFragile ? 15 : 0;
+      const reliabilityScore = carrier.onTimeRate * 0.3;
+
+      const score =
+        operatesScore +
+        weightScore +
+        priorityScore +
+        fragileScore +
+        reliabilityScore;
+
+      return Math.round(score * 100) / 100;
+    }
+
+    function selectBestCarrier(carriers, shipment, product) {
+      const suitableCarriers = carriers
+        .map((carrier) => ({
+          carrier,
+          score: scoreCarrierForShipment(carrier, shipment, product),
+          cost: calculateShippingCost(shipment, product, carrier),
+        }))
+        .filter((option) => option.score >= 50);
+
+      if (suitableCarriers.length === 0) {
+        return null;
+      }
+
+      return suitableCarriers.reduce((best, current) =>
+        current.cost < best.cost ? current : best
+      );
+    }
+
+    function countProductsByCategory(products) {
+      const initialCounts = PRODUCT_CATEGORIES.reduce((acc, category) => {
+        acc[category] = 0;
+        return acc;
+      }, {});
+
+      return products.reduce((acc, product) => {
+        acc[product.category] += 1;
+        return acc;
+      }, initialCounts);
+    }
+
+    function calculateTotalInventoryValue(products) {
+      const total = products
+        .map((product) => product.stockQuantity * product.unitCostUSD)
+        .reduce((sum, value) => sum + value, 0);
+
+      return Math.round(total * 100) / 100;
+    }
+
+    function calculateAverageShipmentDistance(shipments) {
+      if (shipments.length === 0) {
+        return 0;
+      }
+
+      const totalDistance = shipments
+        .map((shipment) => shipment.destination.distanceKm)
+        .reduce((sum, distance) => sum + distance, 0);
+
+      const average = totalDistance / shipments.length;
+      return Math.round(average * 100) / 100;
+    }
+
+    function groupShipmentsByStatus(shipments) {
+      const initialGroups = SHIPMENT_STATUSES.reduce((acc, status) => {
+        acc[status] = [];
+        return acc;
+      }, {});
+
+      return shipments.reduce((acc, shipment) => {
+        return {
+          ...acc,
+          [shipment.status]: [...acc[shipment.status], shipment],
+        };
+      }, initialGroups);
+    }
+
+    function findTopCarriers(shipments, topN) {
+      if (topN <= 0) {
+        return [];
+      }
+
+      const counts = shipments
+        .filter((shipment) => shipment.carrier !== null)
+        .reduce((acc, shipment) => {
+          const carrierName = shipment.carrier;
+          acc[carrierName] = (acc[carrierName] ?? 0) + 1;
+          return acc;
+        }, {});
+
+      return Object.entries(counts)
+        .map(([carrier, count]) => ({ carrier, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, topN);
+    }
+
+    // -------------------------------
+    // Validation utilities
+    // -------------------------------
+
+    function validateProduct(product) {
+      const errors = [];
+
+      if (product.sku.trim().length === 0) {
+        errors.push("SKU must not be empty");
+      }
+
+      if (product.weightKg <= 0 || product.weightKg > 100) {
+        errors.push("Weight must be between 0 and 100 kg");
+      }
+
+      const { lengthCm, widthCm, heightCm } = product.dimensions;
+      const dimensionsAreValid =
+        lengthCm > 0 &&
+        lengthCm <= 200 &&
+        widthCm > 0 &&
+        widthCm <= 200 &&
+        heightCm > 0 &&
+        heightCm <= 200;
+
+      if (!dimensionsAreValid) {
+        errors.push("All dimensions must be between 0 and 200 cm");
+      }
+
+      if (product.stockQuantity < 0) {
+        errors.push("Stock quantity cannot be negative");
+      }
+
+      if (product.minStockThreshold < 0) {
+        errors.push("Min stock threshold cannot be negative");
+      }
+
+      if (product.unitCostUSD <= 0) {
+        errors.push("Unit cost must be greater than 0");
+      }
+
+      return {
+        valid: errors.length === 0,
+        errors,
+      };
+    }
+
+    function validateShipment(shipment) {
+      const errors = [];
+
+      if (shipment.quantity <= 0) {
+        errors.push("Quantity must be greater than 0");
+      }
+
+      if (shipment.declaredValueUSD <= 0) {
+        errors.push("Declared value must be greater than 0");
+      }
+
+      if (shipment.destination.distanceKm < 0) {
+        errors.push("Distance cannot be negative");
+      }
+
+      return {
+        valid: errors.length === 0,
+        errors,
+      };
+    }
+
+    function validateCarrier(carrier) {
+      const errors = [];
+
+      if (
+        carrier.baseRateUSD < 0 ||
+        carrier.ratePerKgUSD < 0 ||
+        carrier.ratePerKmUSD < 0
+      ) {
+        errors.push("Carrier rates cannot be negative");
+      }
+
+      if (carrier.avgDeliveryDays <= 0) {
+        errors.push("Average delivery days must be greater than 0");
+      }
+
+      if (carrier.onTimeRate < 0 || carrier.onTimeRate > 100) {
+        errors.push("On-time rate must be between 0 and 100");
+      }
+
+      if (carrier.maxWeightKg <= 0) {
+        errors.push("Max weight must be greater than 0");
+      }
+
+      if (carrier.operatesIn.length < 1) {
+        errors.push("Carrier must operate in at least one country");
+      }
+
+      return {
+        valid: errors.length === 0,
+        errors,
+      };
+    }
+
+    // -------------------------------
+    // Inventory utilities
+    // -------------------------------
+
+    function recalculateProductStatus(product, stockQuantity) {
+      if (product.status === "Discontinued") {
+        return "Discontinued";
+      }
+
+      if (stockQuantity === 0) {
+        return "Out of stock";
+      }
+
+      if (stockQuantity <= product.minStockThreshold) {
+        return "Low stock";
+      }
+
+      return "Active";
+    }
+
+    function applyInventoryMovement(product, movement) {
+      const nextStockQuantity =
+        movement.type === "Inbound"
+          ? product.stockQuantity + movement.quantity
+          : movement.type === "Adjustment"
+            ? movement.quantity
+            : product.stockQuantity - movement.quantity;
+
+      if (
+        (movement.type === "Outbound" || movement.type === "Transfer") &&
+        nextStockQuantity < 0
+      ) {
+        throw new Error("Insufficient stock for outbound movement");
+      }
+
+      const safeStockQuantity = Math.max(0, nextStockQuantity);
+
+      return {
+        ...product,
+        stockQuantity: safeStockQuantity,
+        status: recalculateProductStatus(product, safeStockQuantity),
+      };
+    }
+
+    function applyMultipleMovements(product, movements) {
+      return movements.reduce(
+        (currentProduct, movement) => applyInventoryMovement(currentProduct, movement),
+        product
+      );
+    }
+
+    function projectStockLevel(product, dailyUsageRate, daysAhead) {
+      const projectedStockRaw = Math.max(
+        0,
+        product.stockQuantity - dailyUsageRate * daysAhead
+      );
+      const projectedStock = Math.round(projectedStockRaw);
+
+      const daysUntilStockout =
+        dailyUsageRate === 0
+          ? null
+          : Math.floor(product.stockQuantity / dailyUsageRate);
+
+      return {
+        projectedStock,
+        daysUntilStockout,
+        willNeedRestock: projectedStock <= product.minStockThreshold,
+      };
+    }
+
+    function getMovementSummary(movements) {
+      const summary = movements.reduce(
+        (acc, movement) => {
+          if (movement.type === "Inbound") {
+            return {
+              ...acc,
+              totalInbound: acc.totalInbound + movement.quantity,
+            };
+          }
+
+          if (movement.type === "Outbound" || movement.type === "Transfer") {
+            return {
+              ...acc,
+              totalOutbound: acc.totalOutbound + movement.quantity,
+            };
+          }
+
+          if (movement.type === "Adjustment") {
+            return {
+              ...acc,
+              totalAdjustments: acc.totalAdjustments + 1,
+            };
+          }
+
+          return acc;
+        },
+        {
+          totalInbound: 0,
+          totalOutbound: 0,
+          totalAdjustments: 0,
+        }
+      );
+
+      return {
+        totalInbound: summary.totalInbound,
+        totalOutbound: summary.totalOutbound,
+        totalAdjustments: summary.totalAdjustments,
+        netChange: summary.totalInbound - summary.totalOutbound,
+      };
+    }
+
+    // -------------------------------
+    // Report utilities
+    // -------------------------------
+
+    function generateWarehouseReport(products, shipments, movements, warehouse) {
+      const scopedProducts =
+        warehouse === "All"
+          ? products
+          : filterProductsByWarehouse(products, warehouse);
+
+      const lowStockProducts = filterLowStockProducts(scopedProducts);
+      const groupedShipments = groupShipmentsByStatus(shipments);
+
+      const shipmentsByStatus = Object.keys(groupedShipments).reduce(
+        (acc, status) => {
+          acc[status] = groupedShipments[status].length;
+          return acc;
+        },
+        {}
+      );
+
+      return {
+        generatedAt: new Date(),
+        warehouse,
+        summary: {
+          totalProducts: scopedProducts.length,
+          totalInventoryValueUSD: calculateTotalInventoryValue(scopedProducts),
+          lowStockCount: lowStockProducts.length,
+          outOfStockCount: scopedProducts.filter(
+            (product) => product.status === "Out of stock"
+          ).length,
+        },
+        productsByCategory: countProductsByCategory(scopedProducts),
+        shipmentsByStatus,
+        topCarriers: findTopCarriers(shipments, 3),
+        movementSummary: getMovementSummary(movements),
+        lowStockAlerts: lowStockProducts.map((product) => ({
+          sku: product.sku,
+          name: product.name,
+          currentStock: product.stockQuantity,
+          minThreshold: product.minStockThreshold,
+          deficit: product.minStockThreshold - product.stockQuantity,
+        })),
+      };
+    }
+
+    function formatReportAsText(report) {
+      const categoryLine =
+        `Fashion: ${report.productsByCategory.Fashion} | ` +
+        `Electronics: ${report.productsByCategory.Electronics} | ` +
+        `Cosmetics: ${report.productsByCategory.Cosmetics} | ` +
+        `Home: ${report.productsByCategory.Home} | ` +
+        `Other: ${report.productsByCategory.Other}`;
+
+      const statusLine =
+        `Pending: ${report.shipmentsByStatus.Pending} | ` +
+        `Assigned: ${report.shipmentsByStatus.Assigned} | ` +
+        `In transit: ${report.shipmentsByStatus["In transit"]} | ` +
+        `Delivered: ${report.shipmentsByStatus.Delivered} | ` +
+        `Failed: ${report.shipmentsByStatus.Failed}`;
+
+      const carriersText =
+        report.topCarriers.length === 0
+          ? "No carrier data"
+          : report.topCarriers
+              .map((entry, index) => `${index + 1}. ${entry.carrier} — ${entry.count} shipments`)
+              .join("\n");
+
+      const alertsText =
+        report.lowStockAlerts.length === 0
+          ? "✅ No low stock alerts"
+          : report.lowStockAlerts
+              .map(
+                (alert) =>
+                  `⚠️  ${alert.sku} — ${alert.name}: ${alert.currentStock} units (min: ${alert.minThreshold}, deficit: ${alert.deficit})`
+              )
+              .join("\n");
+
+      return [
+        "===== TRACKFLOW WAREHOUSE REPORT =====",
+        `Generated: ${report.generatedAt.toISOString()}`,
+        `Warehouse: ${report.warehouse}`,
+        "",
+        "INVENTORY SUMMARY",
+        `Total products: ${report.summary.totalProducts}`,
+        `Total value: $${report.summary.totalInventoryValueUSD.toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}`,
+        `Low stock items: ${report.summary.lowStockCount}`,
+        `Out of stock: ${report.summary.outOfStockCount}`,
+        "",
+        "PRODUCTS BY CATEGORY",
+        categoryLine,
+        "",
+        "SHIPMENTS BY STATUS",
+        statusLine,
+        "",
+        "TOP CARRIERS",
+        carriersText,
+        "",
+        "MOVEMENT SUMMARY",
+        `Inbound: +${report.movementSummary.totalInbound} | Outbound: -${report.movementSummary.totalOutbound} | Adjustments: ${report.movementSummary.totalAdjustments} | Net: ${report.movementSummary.netChange}`,
+        "",
+        "LOW STOCK ALERTS",
+        alertsText,
+        "=======================================",
+      ].join("\n");
+    }
+
+    // -------------------------------
+    // UI helpers and rendering
+    // -------------------------------
+
+    const state = {
+      activeTab: "inventory",
+      inventoryWarehouse: "All",
+      inventoryCategory: "All",
+      inventoryLowOnly: false,
+      selectedShipmentId: sampleShipment.id,
+      report: null,
+    };
+
+    const tabDefs = [
+      { key: "inventory", label: "TAB 1 — Inventory" },
+      { key: "carriers", label: "TAB 2 — Carrier Scoring" },
+      { key: "reports", label: "TAB 3 — Reports" },
+      { key: "validations", label: "TAB 4 — Validations" },
+    ];
+
+    const statusStyles = {
+      Active: "bg-emerald-100 text-emerald-700 border-emerald-200",
+      "Low stock": "bg-amber-100 text-amber-700 border-amber-200",
+      "Out of stock": "bg-rose-100 text-rose-700 border-rose-200",
+      Discontinued: "bg-slate-200 text-slate-700 border-slate-300",
+    };
+
+    function fmtCurrency(value) {
+      return `$${value.toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`;
+    }
+
+    function shipmentLabel(shipment) {
+      return `${shipment.id} • ${shipment.sku} • ${shipment.origin} → ${shipment.destination.city} (${shipment.priority})`;
+    }
+
+    function setActiveTab(tabKey) {
+      state.activeTab = tabKey;
+      document.querySelectorAll(".tab-panel").forEach((panel) => panel.classList.add("hidden"));
+      const activePanel = document.getElementById(`tab-${tabKey}`);
+      if (activePanel) {
+        activePanel.classList.remove("hidden");
+      }
+
+      document.querySelectorAll("[data-tab-btn]").forEach((btn) => {
+        const isActive = btn.getAttribute("data-tab-btn") === tabKey;
+        btn.className = isActive
+          ? "rounded-md border border-orange-400/40 bg-orange-500/20 px-3 py-2 text-left text-sm font-semibold text-orange-200"
+          : "rounded-md border border-slate-600 px-3 py-2 text-left text-sm font-medium text-slate-100 transition hover:border-orange-400 hover:text-orange-200";
+        btn.setAttribute("aria-selected", String(isActive));
+      });
+    }
+
+    function renderTabNav() {
+      const desktop = document.getElementById("tabs-desktop");
+      const mobile = document.getElementById("tabs-mobile");
+
+      const html = tabDefs
+        .map(
+          (tab) =>
+            `<button type="button" role="tab" aria-label="Open ${tab.label}" aria-selected="false" data-tab-btn="${tab.key}">${tab.label}</button>`
+        )
+        .join("");
+
+      desktop.innerHTML = html;
+      mobile.innerHTML = html;
+
+      document.querySelectorAll("[data-tab-btn]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          setActiveTab(btn.getAttribute("data-tab-btn"));
+          const mobileMenu = document.getElementById("tabs-mobile-menu");
+          if (!mobileMenu.classList.contains("hidden")) {
+            mobileMenu.classList.add("hidden");
+            document.getElementById("tabs-menu-toggle").setAttribute("aria-expanded", "false");
+          }
+        });
+      });
+
+      setActiveTab(state.activeTab);
+    }
+
+    function getInventoryViewProducts() {
+      let items = [...sampleProducts];
+
+      if (state.inventoryWarehouse !== "All") {
+        items = filterProductsByWarehouse(items, state.inventoryWarehouse);
+      }
+
+      if (state.inventoryCategory !== "All") {
+        items = filterProductsByCategory(items, state.inventoryCategory);
+      }
+
+      if (state.inventoryLowOnly) {
+        items = filterLowStockProducts(items);
+      }
+
+      return sortProductsByStock(items, "asc");
+    }
+
+    function renderInventoryTab() {
+      const panel = document.getElementById("tab-inventory");
+      const products = getInventoryViewProducts();
+
+      panel.innerHTML = `
+        <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <div class="mb-4 flex items-center justify-between gap-3">
+            <h2 class="text-lg font-bold text-[#0f172a] sm:text-xl">Inventory Explorer</h2>
+            <span class="rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-700">${products.length} results</span>
+          </div>
+
+          <div class="grid gap-3 md:grid-cols-3">
+            <label class="space-y-1 text-sm font-medium text-slate-700">
+              <span>Warehouse</span>
+              <select id="inventory-warehouse" aria-label="Filter products by warehouse" class="w-full rounded-md border border-slate-300 px-3 py-2 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200">
+                <option value="All" ${state.inventoryWarehouse === "All" ? "selected" : ""}>All</option>
+                <option value="Los Angeles" ${state.inventoryWarehouse === "Los Angeles" ? "selected" : ""}>Los Angeles</option>
+                <option value="Zaragoza" ${state.inventoryWarehouse === "Zaragoza" ? "selected" : ""}>Zaragoza</option>
+              </select>
+            </label>
+
+            <label class="space-y-1 text-sm font-medium text-slate-700">
+              <span>Category</span>
+              <select id="inventory-category" aria-label="Filter products by category" class="w-full rounded-md border border-slate-300 px-3 py-2 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200">
+                <option value="All" ${state.inventoryCategory === "All" ? "selected" : ""}>All</option>
+                <option value="Fashion" ${state.inventoryCategory === "Fashion" ? "selected" : ""}>Fashion</option>
+                <option value="Electronics" ${state.inventoryCategory === "Electronics" ? "selected" : ""}>Electronics</option>
+                <option value="Cosmetics" ${state.inventoryCategory === "Cosmetics" ? "selected" : ""}>Cosmetics</option>
+                <option value="Home" ${state.inventoryCategory === "Home" ? "selected" : ""}>Home</option>
+                <option value="Other" ${state.inventoryCategory === "Other" ? "selected" : ""}>Other</option>
+              </select>
+            </label>
+
+            <div class="space-y-1 text-sm font-medium text-slate-700">
+              <span>Filters</span>
+              <button id="low-only-toggle" type="button" aria-label="Toggle low stock only products" class="w-full rounded-md border px-3 py-2 text-left transition ${state.inventoryLowOnly ? "border-orange-500 bg-orange-50 text-orange-700" : "border-slate-300 bg-white text-slate-700 hover:border-orange-300"}">
+                ${state.inventoryLowOnly ? "✓ Showing low stock only" : "Show Low Stock Only"}
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          ${products
+            .map((product) => {
+              const ratio =
+                product.minStockThreshold <= 0
+                  ? 100
+                  : Math.min(100, Math.round((product.stockQuantity / product.minStockThreshold) * 100));
+
+              return `
+                <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <div class="mb-3 flex items-start justify-between gap-2">
+                    <div>
+                      <p class="text-xs font-semibold tracking-wide text-slate-500">${product.sku}</p>
+                      <h3 class="text-base font-semibold text-[#0f172a]">${product.name}</h3>
+                      <p class="text-sm text-slate-600">${product.warehouse} • ${product.category}</p>
+                    </div>
+                    <span class="rounded-full border px-2.5 py-1 text-xs font-semibold ${statusStyles[product.status]}">${product.status}</span>
+                  </div>
+                  <div class="space-y-1">
+                    <div class="flex justify-between text-sm text-slate-700">
+                      <span>Stock ${product.stockQuantity}</span>
+                      <span>Min ${product.minStockThreshold}</span>
+                    </div>
+                    <div class="h-2 w-full overflow-hidden rounded-full bg-slate-200">
+                      <div class="h-full rounded-full ${product.stockQuantity <= product.minStockThreshold ? "bg-amber-400" : "bg-emerald-500"}" style="width: ${ratio}%"></div>
+                    </div>
+                  </div>
+                </article>
+              `;
+            })
+            .join("")}
+        </div>
+      `;
+
+      document.getElementById("inventory-warehouse").addEventListener("change", (event) => {
+        state.inventoryWarehouse = event.target.value;
+        renderInventoryTab();
+      });
+
+      document.getElementById("inventory-category").addEventListener("change", (event) => {
+        state.inventoryCategory = event.target.value;
+        renderInventoryTab();
+      });
+
+      document.getElementById("low-only-toggle").addEventListener("click", () => {
+        state.inventoryLowOnly = !state.inventoryLowOnly;
+        renderInventoryTab();
+      });
+    }
+
+    function renderCarrierTab() {
+      const panel = document.getElementById("tab-carriers");
+      const shipment = findShipmentById(allShipments, state.selectedShipmentId) ?? allShipments[0];
+      const product = findProductBySKU(sampleProducts, shipment.sku) ?? sampleProducts[0];
+
+      const comparison = sampleCarriers.map((carrier) => {
+        const score = scoreCarrierForShipment(carrier, shipment, product);
+        const cost = calculateShippingCost(shipment, product, carrier);
+        return { carrier, score, cost };
+      });
+
+      const winner = selectBestCarrier(sampleCarriers, shipment, product);
+      const winnerName = winner ? winner.carrier.name : null;
+
+      panel.innerHTML = `
+        <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <div class="mb-4 flex items-center justify-between gap-3">
+            <h2 class="text-lg font-bold text-[#0f172a] sm:text-xl">Carrier Scoring Engine</h2>
+            <span class="rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-700">Star feature</span>
+          </div>
+          <label class="block space-y-1 text-sm font-medium text-slate-700">
+            <span>Select shipment</span>
+            <select id="carrier-shipment-select" aria-label="Select shipment for carrier scoring" class="w-full rounded-md border border-slate-300 px-3 py-2 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200">
+              ${allShipments
+                .map(
+                  (item) =>
+                    `<option value="${item.id}" ${item.id === shipment.id ? "selected" : ""}>${shipmentLabel(item)}</option>`
+                )
+                .join("")}
+            </select>
+          </label>
+        </article>
+
+        <article class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-left text-sm">
+              <thead class="bg-slate-100 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                <tr>
+                  <th class="px-4 py-3">Carrier</th>
+                  <th class="px-4 py-3">Score</th>
+                  <th class="px-4 py-3">Cost</th>
+                  <th class="px-4 py-3">Operates In</th>
+                  <th class="px-4 py-3">On-Time Rate</th>
+                  <th class="px-4 py-3">Handles Fragile</th>
+                  <th class="px-4 py-3">Verdict</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${comparison
+                  .map(({ carrier, score, cost }) => {
+                    const isWinner = carrier.name === winnerName;
+                    const verdict = isWinner
+                      ? "✅ Best pick"
+                      : score >= 50
+                        ? "✅ Suitable"
+                        : "❌ Not suitable";
+
+                    return `
+                      <tr class="border-t border-slate-200 ${isWinner ? "bg-orange-50" : "bg-white"}">
+                        <td class="px-4 py-3 font-semibold text-[#0f172a]">${carrier.name}</td>
+                        <td class="px-4 py-3">${score}</td>
+                        <td class="px-4 py-3">${fmtCurrency(cost)}</td>
+                        <td class="px-4 py-3">${carrier.operatesIn.join(", ")}</td>
+                        <td class="px-4 py-3">${carrier.onTimeRate}%</td>
+                        <td class="px-4 py-3">${carrier.handlesFragile ? "Yes" : "No"}</td>
+                        <td class="px-4 py-3 font-medium ${isWinner ? "text-orange-700" : score >= 50 ? "text-emerald-700" : "text-rose-700"}">${verdict}</td>
+                      </tr>
+                    `;
+                  })
+                  .join("")}
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="rounded-xl border border-orange-200 bg-orange-50 p-5 shadow-sm">
+          <h3 class="text-sm font-semibold uppercase tracking-wide text-orange-700">Selection summary</h3>
+          <p class="mt-2 text-base font-semibold text-[#0f172a]">
+            ${winner
+              ? `Best carrier: ${winner.carrier.name} — Score: ${winner.score} | Cost: ${fmtCurrency(winner.cost)}`
+              : "Best carrier: None — no suitable carrier found"}
+          </p>
+        </article>
+      `;
+
+      document.getElementById("carrier-shipment-select").addEventListener("change", (event) => {
+        state.selectedShipmentId = event.target.value;
+        renderCarrierTab();
+      });
+    }
+
+    function renderCategoryBars(report) {
+      const entries = Object.entries(report.productsByCategory);
+      const max = Math.max(...entries.map(([, value]) => value), 1);
+
+      return entries
+        .map(([category, value]) => {
+          const width = Math.round((value / max) * 100);
+          return `
+            <div class="space-y-1">
+              <div class="flex items-center justify-between text-sm text-slate-700">
+                <span>${category}</span>
+                <span>${value}</span>
+              </div>
+              <div class="h-3 rounded-full bg-slate-200">
+                <div class="h-full rounded-full bg-orange-500" style="width:${width}%"></div>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+    }
+
+    function renderReportsTab() {
+      const panel = document.getElementById("tab-reports");
+      const report = state.report;
+
+      panel.innerHTML = `
+        <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <h2 class="text-lg font-bold text-[#0f172a] sm:text-xl">Reports Console</h2>
+            <button id="generate-report-btn" type="button" aria-label="Generate full warehouse report" class="rounded-md bg-[#f97316] px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-300">
+              Generate Full Report
+            </button>
+          </div>
+        </article>
+
+        <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h3 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-600">Formatted report output</h3>
+          <pre class="overflow-x-auto rounded-lg border border-slate-200 bg-slate-900 p-4 text-xs leading-6 text-slate-100 sm:text-sm">${report ? formatReportAsText(report) : "Press Generate Full Report to render output"}</pre>
+        </article>
+
+        <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h3 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-600">Products by category</h3>
+          <div class="space-y-3">
+            ${report ? renderCategoryBars(report) : "<p class='text-sm text-slate-500'>No report yet.</p>"}
+          </div>
+        </article>
+      `;
+
+      document.getElementById("generate-report-btn").addEventListener("click", () => {
+        state.report = generateWarehouseReport(sampleProducts, allShipments, allMovements, "All");
+        renderReportsTab();
+      });
+    }
+
+    function hasMessage(errors, message) {
+      return errors.includes(message);
+    }
+
+    function renderFieldError(show, message) {
+      return show ? `<p class="mt-1 text-xs text-rose-600">${message}</p>` : "";
+    }
+
+    const invalidDefaults = {
+      product: {
+        sku: "",
+        weightKg: -1,
+        unitCostUSD: 0,
+      },
+      shipment: {
+        quantity: 0,
+        declaredValueUSD: 0,
+        distanceKm: -5,
+      },
+      carrier: {
+        baseRateUSD: -1,
+        ratePerKgUSD: -1,
+        ratePerKmUSD: -1,
+        avgDeliveryDays: 0,
+        onTimeRate: 150,
+        maxWeightKg: 0,
+        operatesInCount: 0,
+      },
+    };
+
+    function renderValidationsTab() {
+      const panel = document.getElementById("tab-validations");
+      panel.innerHTML = `
+        <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <h2 class="text-lg font-bold text-[#0f172a] sm:text-xl">Validation Studio</h2>
+          <p class="mt-1 text-sm text-slate-600">Forms start with invalid values so you can test each rule quickly.</p>
+        </article>
+
+        <div class="grid gap-4 lg:grid-cols-3">
+          <form id="product-form" class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm" aria-label="Validate product form">
+            <h3 class="mb-3 text-base font-semibold text-[#0f172a]">Validate Product</h3>
+            <label class="mb-2 block text-sm">SKU
+              <input name="sku" value="${invalidDefaults.product.sku}" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" aria-label="Product SKU" />
+            </label>
+            <label class="mb-2 block text-sm">Weight Kg
+              <input name="weightKg" type="number" value="${invalidDefaults.product.weightKg}" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" aria-label="Product weight" />
+            </label>
+            <label class="mb-2 block text-sm">Unit Cost USD
+              <input name="unitCostUSD" type="number" value="${invalidDefaults.product.unitCostUSD}" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" aria-label="Product unit cost" />
+            </label>
+            <div id="product-errors" class="mb-3"></div>
+            <div class="flex gap-2">
+              <button type="submit" class="rounded-md bg-[#f97316] px-3 py-2 text-sm font-semibold text-white">Validate</button>
+              <button type="button" data-reset="product" class="rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700">Reset</button>
+            </div>
+          </form>
+
+          <form id="shipment-form" class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm" aria-label="Validate shipment form">
+            <h3 class="mb-3 text-base font-semibold text-[#0f172a]">Validate Shipment</h3>
+            <label class="mb-2 block text-sm">Quantity
+              <input name="quantity" type="number" value="${invalidDefaults.shipment.quantity}" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" aria-label="Shipment quantity" />
+            </label>
+            <label class="mb-2 block text-sm">Declared Value USD
+              <input name="declaredValueUSD" type="number" value="${invalidDefaults.shipment.declaredValueUSD}" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" aria-label="Shipment declared value" />
+            </label>
+            <label class="mb-2 block text-sm">Distance Km
+              <input name="distanceKm" type="number" value="${invalidDefaults.shipment.distanceKm}" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" aria-label="Shipment distance" />
+            </label>
+            <div id="shipment-errors" class="mb-3"></div>
+            <div class="flex gap-2">
+              <button type="submit" class="rounded-md bg-[#f97316] px-3 py-2 text-sm font-semibold text-white">Validate</button>
+              <button type="button" data-reset="shipment" class="rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700">Reset</button>
+            </div>
+          </form>
+
+          <form id="carrier-form" class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm" aria-label="Validate carrier form">
+            <h3 class="mb-3 text-base font-semibold text-[#0f172a]">Validate Carrier</h3>
+            <label class="mb-2 block text-sm">Base Rate USD
+              <input name="baseRateUSD" type="number" value="${invalidDefaults.carrier.baseRateUSD}" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" aria-label="Carrier base rate" />
+            </label>
+            <label class="mb-2 block text-sm">On-time Rate
+              <input name="onTimeRate" type="number" value="${invalidDefaults.carrier.onTimeRate}" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" aria-label="Carrier on time rate" />
+            </label>
+            <label class="mb-2 block text-sm">Operates In Count
+              <input name="operatesInCount" type="number" value="${invalidDefaults.carrier.operatesInCount}" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" aria-label="Carrier countries count" />
+            </label>
+            <div id="carrier-errors" class="mb-3"></div>
+            <div class="flex gap-2">
+              <button type="submit" class="rounded-md bg-[#f97316] px-3 py-2 text-sm font-semibold text-white">Validate</button>
+              <button type="button" data-reset="carrier" class="rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700">Reset</button>
+            </div>
+          </form>
+        </div>
+      `;
+
+      const productForm = document.getElementById("product-form");
+      const shipmentForm = document.getElementById("shipment-form");
+      const carrierForm = document.getElementById("carrier-form");
+
+      productForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const formData = new FormData(productForm);
+        const candidate = {
+          ...sampleProducts[0],
+          sku: String(formData.get("sku") ?? ""),
+          weightKg: Number(formData.get("weightKg") ?? 0),
+          unitCostUSD: Number(formData.get("unitCostUSD") ?? 0),
+        };
+
+        const result = validateProduct(candidate);
+        const bucket = document.getElementById("product-errors");
+        if (result.valid) {
+          bucket.innerHTML = '<p class="rounded-md bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">✅ Valid</p>';
+          return;
+        }
+
+        bucket.innerHTML = [
+          renderFieldError(hasMessage(result.errors, "SKU must not be empty"), "SKU must not be empty"),
+          renderFieldError(hasMessage(result.errors, "Weight must be between 0 and 100 kg"), "Weight must be between 0 and 100 kg"),
+          renderFieldError(hasMessage(result.errors, "Unit cost must be greater than 0"), "Unit cost must be greater than 0"),
+        ].join("");
+      });
+
+      shipmentForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const formData = new FormData(shipmentForm);
+        const candidate = {
+          ...sampleShipment,
+          quantity: Number(formData.get("quantity") ?? 0),
+          declaredValueUSD: Number(formData.get("declaredValueUSD") ?? 0),
+          destination: {
+            ...sampleShipment.destination,
+            distanceKm: Number(formData.get("distanceKm") ?? 0),
+          },
+        };
+
+        const result = validateShipment(candidate);
+        const bucket = document.getElementById("shipment-errors");
+        if (result.valid) {
+          bucket.innerHTML = '<p class="rounded-md bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">✅ Valid</p>';
+          return;
+        }
+
+        bucket.innerHTML = [
+          renderFieldError(hasMessage(result.errors, "Quantity must be greater than 0"), "Quantity must be greater than 0"),
+          renderFieldError(hasMessage(result.errors, "Declared value must be greater than 0"), "Declared value must be greater than 0"),
+          renderFieldError(hasMessage(result.errors, "Distance cannot be negative"), "Distance cannot be negative"),
+        ].join("");
+      });
+
+      carrierForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const formData = new FormData(carrierForm);
+        const operatesInCount = Number(formData.get("operatesInCount") ?? 0);
+
+        const candidate = {
+          ...sampleCarriers[0],
+          baseRateUSD: Number(formData.get("baseRateUSD") ?? 0),
+          ratePerKgUSD: invalidDefaults.carrier.ratePerKgUSD,
+          ratePerKmUSD: invalidDefaults.carrier.ratePerKmUSD,
+          avgDeliveryDays: invalidDefaults.carrier.avgDeliveryDays,
+          onTimeRate: Number(formData.get("onTimeRate") ?? 0),
+          maxWeightKg: invalidDefaults.carrier.maxWeightKg,
+          operatesIn: operatesInCount > 0 ? ["Spain"] : [],
+        };
+
+        const result = validateCarrier(candidate);
+        const bucket = document.getElementById("carrier-errors");
+        if (result.valid) {
+          bucket.innerHTML = '<p class="rounded-md bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">✅ Valid</p>';
+          return;
+        }
+
+        bucket.innerHTML = [
+          renderFieldError(hasMessage(result.errors, "Carrier rates cannot be negative"), "Carrier rates cannot be negative"),
+          renderFieldError(hasMessage(result.errors, "Average delivery days must be greater than 0"), "Average delivery days must be greater than 0"),
+          renderFieldError(hasMessage(result.errors, "On-time rate must be between 0 and 100"), "On-time rate must be between 0 and 100"),
+          renderFieldError(hasMessage(result.errors, "Max weight must be greater than 0"), "Max weight must be greater than 0"),
+          renderFieldError(hasMessage(result.errors, "Carrier must operate in at least one country"), "Carrier must operate in at least one country"),
+        ].join("");
+      });
+
+      document.querySelectorAll("[data-reset]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          renderValidationsTab();
+        });
+      });
+    }
+
+    function renderAllTabs() {
+      renderInventoryTab();
+      renderCarrierTab();
+      renderReportsTab();
+      renderValidationsTab();
+    }
+
+    document.getElementById("tabs-menu-toggle").addEventListener("click", () => {
+      const mobileMenu = document.getElementById("tabs-mobile-menu");
+      const expanded = mobileMenu.classList.contains("hidden");
+      mobileMenu.classList.toggle("hidden");
+      document.getElementById("tabs-menu-toggle").setAttribute("aria-expanded", String(expanded));
+    });
+
+    renderTabNav();
+    renderAllTabs();
+  </script>
+</body>
+</html>
