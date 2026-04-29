@@ -1,154 +1,189 @@
 import type {
-  Client,
-  MonthlyShippingVolume,
-  OperatingCountry,
-  ProductType,
-  Report,
+  Carrier,
+  Product,
+  ProductCategory,
   Shipment,
-  WarehouseItem,
+  ShipmentStatus,
 } from "../types/models";
 
-const COUNTRIES: OperatingCountry[] = ["US", "ES", "BOTH", "OTHER"];
-const PRODUCT_TYPES: ProductType[] = [
-  "fashion",
-  "electronics",
-  "cosmetics",
-  "food",
-  "other",
-];
-const VOLUME_RANGES: MonthlyShippingVolume[] = [
-  "0-100",
-  "101-500",
-  "501-2000",
-  "2000+",
-  "not-sure",
+const PRODUCT_CATEGORIES: ProductCategory[] = [
+  "Fashion",
+  "Electronics",
+  "Cosmetics",
+  "Home",
+  "Other",
 ];
 
-function countBy(values: string[]): Record<string, number> {
-  return values.reduce<Record<string, number>>((acc, value) => {
-    acc[value] = (acc[value] ?? 0) + 1;
-    return acc;
-  }, {});
+const SHIPMENT_STATUSES: ShipmentStatus[] = [
+  "Pending",
+  "Assigned",
+  "In transit",
+  "Delivered",
+  "Failed",
+];
+
+type CarrierSelection = { carrier: Carrier; score: number; cost: number };
+
+export function calculateShippingCost(
+  shipment: Shipment,
+  product: Product,
+  carrier: Carrier
+): number {
+  const base: number = carrier.baseRateUSD;
+  const weightCost: number =
+    product.weightKg * carrier.ratePerKgUSD * shipment.quantity;
+  const distanceCost: number =
+    shipment.destination.distanceKm * carrier.ratePerKmUSD;
+  const subtotal: number = base + weightCost + distanceCost;
+
+  const surchargeMultiplier: number =
+    shipment.priority === "Express"
+      ? 1.3
+      : shipment.priority === "Same-day"
+        ? 1.6
+        : 1;
+
+  const total: number = subtotal * surchargeMultiplier;
+  return Math.round(total * 100) / 100;
 }
 
-function zeroedRecord<T extends string>(keys: T[]): Record<T, number> {
-  return keys.reduce<Record<T, number>>((acc, key) => {
-    acc[key] = 0;
-    return acc;
-  }, {} as Record<T, number>);
+export function scoreCarrierForShipment(
+  carrier: Carrier,
+  shipment: Shipment,
+  product: Product
+): number {
+  const operatesScore: number = carrier.operatesIn.includes(
+    shipment.destination.country
+  )
+    ? 20
+    : 0;
+
+  const totalWeight: number = product.weightKg * shipment.quantity;
+  const weightScore: number = totalWeight <= carrier.maxWeightKg ? 20 : 0;
+
+  const priorityScore: number = carrier.acceptsPriority.includes(shipment.priority)
+    ? 15
+    : 0;
+
+  const fragileScore: number = !product.isFragile || carrier.handlesFragile ? 15 : 0;
+
+  const reliabilityScore: number = carrier.onTimeRate * 0.3;
+  const score: number =
+    operatesScore +
+    weightScore +
+    priorityScore +
+    fragileScore +
+    reliabilityScore;
+
+  return Math.round(score * 100) / 100;
 }
 
-export function countClientsByCountry(clients: Client[]): Record<string, number> {
-  return countBy(clients.map((client) => client.operatingCountry));
-}
+export function selectBestCarrier(
+  carriers: Carrier[],
+  shipment: Shipment,
+  product: Product
+): CarrierSelection | null {
+  const suitableCarriers: CarrierSelection[] = carriers
+    .map(
+      (carrier: Carrier): CarrierSelection => ({
+        carrier,
+        score: scoreCarrierForShipment(carrier, shipment, product),
+        cost: calculateShippingCost(shipment, product, carrier),
+      })
+    )
+    .filter((option: CarrierSelection) => option.score >= 50);
 
-export function countClientsByProductType(
-  clients: Client[]
-): Record<string, number> {
-  return countBy(clients.map((client) => client.productType));
-}
+  if (suitableCarriers.length === 0) {
+    return null;
+  }
 
-export function countClientsByVolumeRange(
-  clients: Client[]
-): Record<string, number> {
-  return countBy(clients.map((client) => client.monthlyShippingVolume));
-}
-
-export function countClientsByService(clients: Client[]): Record<string, number> {
-  return countBy(
-    clients
-      .filter((client) => client.servicesOfInterest.length > 0)
-      .flatMap((client) => client.servicesOfInterest)
+  return suitableCarriers.reduce(
+    (best: CarrierSelection, current: CarrierSelection): CarrierSelection =>
+      current.cost < best.cost ? current : best
   );
 }
 
-export function totalWeightByWarehouse(
-  shipments: Shipment[]
-): Record<string, number> {
-  return shipments.reduce<Record<string, number>>((acc, shipment) => {
-    const key = shipment.originWarehouse;
-    acc[key] = (acc[key] ?? 0) + shipment.weightKg;
-    return acc;
-  }, {});
+export function countProductsByCategory(
+  products: Product[]
+): Record<ProductCategory, number> {
+  const initialCounts: Record<ProductCategory, number> = PRODUCT_CATEGORIES.reduce(
+    (acc: Record<ProductCategory, number>, category: ProductCategory) => {
+      acc[category] = 0;
+      return acc;
+    },
+    {} as Record<ProductCategory, number>
+  );
+
+  return products.reduce(
+    (acc: Record<ProductCategory, number>, product: Product) => {
+      acc[product.category] += 1;
+      return acc;
+    },
+    initialCounts
+  );
 }
 
-export function averageWeightPerShipment(shipments: Shipment[]): number {
+export function calculateTotalInventoryValue(products: Product[]): number {
+  const total: number = products
+    .map((product: Product) => product.stockQuantity * product.unitCostUSD)
+    .reduce((sum: number, value: number) => sum + value, 0);
+
+  return Math.round(total * 100) / 100;
+}
+
+export function calculateAverageShipmentDistance(shipments: Shipment[]): number {
   if (shipments.length === 0) {
     return 0;
   }
 
-  const totalWeight = shipments
-    .map((shipment) => shipment.weightKg)
-    .reduce((sum, weight) => sum + weight, 0);
+  const totalDistance: number = shipments
+    .map((shipment: Shipment) => shipment.destination.distanceKm)
+    .reduce((sum: number, distance: number) => sum + distance, 0);
 
-  return totalWeight / shipments.length;
+  const average: number = totalDistance / shipments.length;
+  return Math.round(average * 100) / 100;
 }
 
-export function findHeaviestShipment(shipments: Shipment[]): Shipment | null {
-  return shipments.reduce<Shipment | null>((heaviest, shipment) => {
-    if (!heaviest || shipment.weightKg > heaviest.weightKg) {
-      return shipment;
-    }
-
-    return heaviest;
-  }, null);
-}
-
-export function findLightestShipment(shipments: Shipment[]): Shipment | null {
-  return shipments.reduce<Shipment | null>((lightest, shipment) => {
-    if (!lightest || shipment.weightKg < lightest.weightKg) {
-      return shipment;
-    }
-
-    return lightest;
-  }, null);
-}
-
-export function totalStockByCategory(items: WarehouseItem[]): Record<string, number> {
-  return items.reduce<Record<string, number>>((acc, item) => {
-    const key = item.category;
-    acc[key] = (acc[key] ?? 0) + item.quantity;
-    return acc;
-  }, {});
-}
-
-export function generateClientReport(
-  clients: Client[],
+export function groupShipmentsByStatus(
   shipments: Shipment[]
-): Report {
-  const clientsByCountry = clients.reduce<Record<OperatingCountry, number>>(
-    (acc, client) => {
-      acc[client.operatingCountry] += 1;
+): Record<ShipmentStatus, Shipment[]> {
+  const initialGroups: Record<ShipmentStatus, Shipment[]> = SHIPMENT_STATUSES.reduce(
+    (acc: Record<ShipmentStatus, Shipment[]>, status: ShipmentStatus) => {
+      acc[status] = [];
       return acc;
     },
-    zeroedRecord(COUNTRIES)
+    {} as Record<ShipmentStatus, Shipment[]>
   );
 
-  const clientsByProductType = clients.reduce<Record<ProductType, number>>(
-    (acc, client) => {
-      acc[client.productType] += 1;
-      return acc;
+  return shipments.reduce(
+    (acc: Record<ShipmentStatus, Shipment[]>, shipment: Shipment) => {
+      return {
+        ...acc,
+        [shipment.status]: [...acc[shipment.status], shipment],
+      };
     },
-    zeroedRecord(PRODUCT_TYPES)
+    initialGroups
   );
+}
 
-  const clientsByVolumeRange = clients.reduce<Record<MonthlyShippingVolume, number>>(
-    (acc, client) => {
-      acc[client.monthlyShippingVolume] += 1;
+export function findTopCarriers(
+  shipments: Shipment[],
+  topN: number
+): Array<{ carrier: string; count: number }> {
+  if (topN <= 0) {
+    return [];
+  }
+
+  const counts: Record<string, number> = shipments
+    .filter((shipment: Shipment) => shipment.carrier !== null)
+    .reduce((acc: Record<string, number>, shipment: Shipment) => {
+      const carrierName: string = shipment.carrier as string;
+      acc[carrierName] = (acc[carrierName] ?? 0) + 1;
       return acc;
-    },
-    zeroedRecord(VOLUME_RANGES)
-  );
+    }, {});
 
-  const averageShipmentsPerClient =
-    clients.length === 0 ? 0 : shipments.length / clients.length;
-
-  return {
-    generatedDate: new Date().toISOString(),
-    totalClients: clients.length,
-    clientsByCountry,
-    clientsByProductType,
-    clientsByVolumeRange,
-    averageShipmentsPerClient,
-  };
+  return Object.entries(counts)
+    .map(([carrier, count]: [string, number]) => ({ carrier, count }))
+    .sort((a: { carrier: string; count: number }, b: { carrier: string; count: number }) => b.count - a.count)
+    .slice(0, topN);
 }

@@ -1,66 +1,91 @@
-export type OperatingCountry = "US" | "ES" | "BOTH" | "OTHER";
-
-export type ProductType =
-  | "fashion"
-  | "electronics"
-  | "cosmetics"
-  | "food"
-  | "other";
-
-export type MonthlyShippingVolume =
-  | "0-100"
-  | "101-500"
-  | "501-2000"
-  | "2000+"
-  | "not-sure";
-
-export type ServiceOfInterest = "warehousing" | "last-mile" | "reverse";
-
-export type Current3PL = "yes" | "no" | "evaluating";
-
-export interface Client {
-  companyName: string;
-  contactPerson: string;
-  corporateEmail: string;
-  phone: string;
-  website?: string;
-  operatingCountry: OperatingCountry;
-  productType: ProductType;
-  monthlyShippingVolume: MonthlyShippingVolume;
-  servicesOfInterest: ServiceOfInterest[];
-  current3PL: Current3PL;
-  comments?: string;
+export interface Dimensions {
+  lengthCm: number;
+  widthCm: number;
+  heightCm: number;
 }
 
-export type WarehouseOrigin = "los-angeles" | "zaragoza";
+export type ProductCategory =
+  | "Fashion"
+  | "Electronics"
+  | "Cosmetics"
+  | "Home"
+  | "Other";
+
+export type WarehouseLocation = "Los Angeles" | "Zaragoza";
+
+export type ProductStatus =
+  | "Active"
+  | "Low stock"
+  | "Out of stock"
+  | "Discontinued";
+
+export type Country = "United States" | "Spain";
+
+export type ShipmentPriority = "Standard" | "Express" | "Same-day";
+
+export type ShipmentStatus =
+  | "Pending"
+  | "Assigned"
+  | "In transit"
+  | "Delivered"
+  | "Failed";
+
+export type MovementType = "Inbound" | "Outbound" | "Transfer" | "Adjustment";
+
+export interface Product {
+  sku: string;
+  name: string;
+  category: ProductCategory;
+  weightKg: number;
+  dimensions: Dimensions;
+  warehouse: WarehouseLocation;
+  stockQuantity: number;
+  minStockThreshold: number;
+  unitCostUSD: number;
+  isFragile: boolean;
+  status: ProductStatus;
+}
+
+export interface Destination {
+  city: string;
+  country: Country;
+  postalCode: string;
+  distanceKm: number;
+}
 
 export interface Shipment {
   id: string;
-  clientId: string;
-  originWarehouse: WarehouseOrigin;
-  carrier: string;
-  status: string;
-  estimatedDeliveryDate: string;
-  actualDeliveryDate?: string;
-  weightKg: number;
-  destinationCountry: string;
+  sku: string;
+  quantity: number;
+  origin: WarehouseLocation;
+  destination: Destination;
+  priority: ShipmentPriority;
+  declaredValueUSD: number;
+  carrier: string | null;
+  status: ShipmentStatus;
+  createdAt: Date;
 }
 
-export interface WarehouseItem {
+export interface Carrier {
+  id: string;
+  name: string;
+  operatesIn: Country[];
+  baseRateUSD: number;
+  ratePerKgUSD: number;
+  ratePerKmUSD: number;
+  avgDeliveryDays: number;
+  onTimeRate: number;
+  maxWeightKg: number;
+  handlesFragile: boolean;
+  acceptsPriority: ShipmentPriority[];
+}
+
+export interface InventoryMovement {
   id: string;
   sku: string;
-  name: string;
-  category: ProductType;
+  warehouse: WarehouseLocation;
+  type: MovementType;
   quantity: number;
-  warehouseLocation: WarehouseOrigin;
-  lastUpdatedDate: string;
-}
-
-export interface Report {
-  generatedDate: string;
-  totalClients: number;
-  clientsByCountry: Record<OperatingCountry, number>;
-  clientsByProductType: Record<ProductType, number>;
-  clientsByVolumeRange: Record<MonthlyShippingVolume, number>;
-  averageShipmentsPerClient: number;
+  reason: string;
+  timestamp: Date;
 }

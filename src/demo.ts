@@ -1,199 +1,397 @@
-import type { Client, Shipment, WarehouseItem } from "./types/models";
-import * as collections from "./utils/collections";
-import * as search from "./utils/search";
-import * as transformations from "./utils/transformations";
-import * as validations from "./utils/validations";
+import type { Carrier, InventoryMovement, Product, Shipment } from "./types/models";
+import {
+  filterLowStockProducts,
+  filterProductsByWarehouse,
+  sortCarriersByReliability,
+} from "./utils/collections";
+import { binarySearchProductByWeight, findProductBySKU } from "./utils/search";
+import {
+  calculateShippingCost,
+  calculateTotalInventoryValue,
+  countProductsByCategory,
+  findTopCarriers,
+  groupShipmentsByStatus,
+  scoreCarrierForShipment,
+  selectBestCarrier,
+} from "./utils/transformations";
+import {
+  applyInventoryMovement,
+  applyMultipleMovements,
+  getMovementSummary,
+  projectStockLevel,
+} from "./utils/inventory";
+import { formatReportAsText, generateWarehouseReport } from "./utils/reports";
+import { validateCarrier, validateProduct } from "./utils/validations";
 
-const clients: Client[] = [
+const sampleProducts: Product[] = [
   {
-    companyName: "Aster Fashion Co",
-    contactPerson: "Mia Carter",
-    corporateEmail: "ops@asterfashion.com",
-    phone: "+1 213 555 0101",
-    website: "https://asterfashion.com",
-    operatingCountry: "US",
-    productType: "fashion",
-    monthlyShippingVolume: "101-500",
-    servicesOfInterest: ["warehousing", "last-mile"],
-    current3PL: "yes",
-    comments: "Needs same-day options in LA.",
+    sku: "SHOE-BLK-42",
+    name: "Black Running Shoes - Size 42",
+    category: "Fashion",
+    weightKg: 0.8,
+    dimensions: { lengthCm: 35, widthCm: 22, heightCm: 12 },
+    warehouse: "Los Angeles",
+    stockQuantity: 45,
+    minStockThreshold: 20,
+    unitCostUSD: 35.0,
+    isFragile: false,
+    status: "Active",
   },
   {
-    companyName: "VoltEdge Electronics",
-    contactPerson: "Luis Navarro",
-    corporateEmail: "contact@voltedge.io",
-    phone: "+34 976 555 102",
-    website: "https://voltedge.io",
-    operatingCountry: "ES",
-    productType: "electronics",
-    monthlyShippingVolume: "501-2000",
-    servicesOfInterest: ["last-mile", "reverse"],
-    current3PL: "evaluating",
+    sku: "LAPTOP-DELL-15",
+    name: "Dell Laptop 15 inch",
+    category: "Electronics",
+    weightKg: 2.3,
+    dimensions: { lengthCm: 40, widthCm: 28, heightCm: 3 },
+    warehouse: "Zaragoza",
+    stockQuantity: 8,
+    minStockThreshold: 10,
+    unitCostUSD: 650.0,
+    isFragile: true,
+    status: "Low stock",
   },
   {
-    companyName: "BloomSkin Labs",
-    contactPerson: "Nora Blake",
-    corporateEmail: "team@bloomskin.com",
-    phone: "+1 323 555 0199",
-    operatingCountry: "BOTH",
-    productType: "cosmetics",
-    monthlyShippingVolume: "2000+",
-    servicesOfInterest: ["warehousing", "reverse"],
-    current3PL: "no",
+    sku: "PERFUME-COCO-50",
+    name: "Coco Perfume 50ml",
+    category: "Cosmetics",
+    weightKg: 0.3,
+    dimensions: { lengthCm: 12, widthCm: 8, heightCm: 15 },
+    warehouse: "Los Angeles",
+    stockQuantity: 120,
+    minStockThreshold: 30,
+    unitCostUSD: 85.0,
+    isFragile: true,
+    status: "Active",
   },
   {
-    companyName: "FreshCrate Market",
-    contactPerson: "Pablo Ortiz",
-    corporateEmail: "hello@freshcrate.es",
-    phone: "+34 640 555 778",
-    operatingCountry: "OTHER",
-    productType: "food",
-    monthlyShippingVolume: "0-100",
-    servicesOfInterest: ["warehousing"],
-    current3PL: "no",
+    sku: "LAMP-WOOD-01",
+    name: "Wooden Table Lamp",
+    category: "Home",
+    weightKg: 1.9,
+    dimensions: { lengthCm: 28, widthCm: 28, heightCm: 45 },
+    warehouse: "Zaragoza",
+    stockQuantity: 3,
+    minStockThreshold: 6,
+    unitCostUSD: 42.5,
+    isFragile: true,
+    status: "Low stock",
   },
   {
-    companyName: "Circuit Nest",
-    contactPerson: "Emma Reed",
-    corporateEmail: "logistics@circuitnest.com",
-    phone: "+1 562 555 0188",
-    website: "https://circuitnest.com",
-    operatingCountry: "US",
-    productType: "electronics",
-    monthlyShippingVolume: "not-sure",
-    servicesOfInterest: ["last-mile"],
-    current3PL: "yes",
-  },
-  {
-    companyName: "MonoCos",
-    contactPerson: "Alex",
-    corporateEmail: "",
-    phone: "+1 424 555 0177",
-    operatingCountry: "US",
-    productType: "cosmetics",
-    monthlyShippingVolume: "0-100",
-    servicesOfInterest: ["reverse"],
-    current3PL: "evaluating",
-    comments: "Potential pilot account.",
+    sku: "MISC-KIT-99",
+    name: "Utility Starter Kit",
+    category: "Other",
+    weightKg: 1.1,
+    dimensions: { lengthCm: 20, widthCm: 15, heightCm: 10 },
+    warehouse: "Los Angeles",
+    stockQuantity: 60,
+    minStockThreshold: 15,
+    unitCostUSD: 19.99,
+    isFragile: false,
+    status: "Active",
   },
 ];
 
-const shipments: Shipment[] = [
+const sampleCarriers: Carrier[] = [
   {
-    id: "SHP-1001",
-    clientId: "Aster Fashion Co",
-    originWarehouse: "los-angeles",
-    carrier: "SwiftShip",
-    status: "in-transit",
-    estimatedDeliveryDate: "2026-05-05T12:00:00.000Z",
-    actualDeliveryDate: undefined,
-    weightKg: 42.5,
-    destinationCountry: "US",
+    id: "CAR-UPS",
+    name: "UPS",
+    operatesIn: ["United States"],
+    baseRateUSD: 5.0,
+    ratePerKgUSD: 1.2,
+    ratePerKmUSD: 0.05,
+    avgDeliveryDays: 3,
+    onTimeRate: 88,
+    maxWeightKg: 30,
+    handlesFragile: true,
+    acceptsPriority: ["Standard", "Express"],
   },
   {
-    id: "SHP-1002",
-    clientId: "Circuit Nest",
-    originWarehouse: "los-angeles",
-    carrier: "ParcelFly",
-    status: "delivered",
-    estimatedDeliveryDate: "2026-05-03T10:00:00.000Z",
-    actualDeliveryDate: "2026-05-03T09:32:00.000Z",
-    weightKg: 18.2,
-    destinationCountry: "US",
+    id: "CAR-SEUR",
+    name: "SEUR",
+    operatesIn: ["Spain"],
+    baseRateUSD: 6.5,
+    ratePerKgUSD: 1.5,
+    ratePerKmUSD: 0.08,
+    avgDeliveryDays: 2,
+    onTimeRate: 92,
+    maxWeightKg: 25,
+    handlesFragile: true,
+    acceptsPriority: ["Standard", "Express", "Same-day"],
   },
   {
-    id: "SHP-2001",
-    clientId: "VoltEdge Electronics",
-    originWarehouse: "zaragoza",
-    carrier: "IberiaExpress",
-    status: "processing",
-    estimatedDeliveryDate: "2026-05-06T15:00:00.000Z",
-    actualDeliveryDate: undefined,
-    weightKg: 55.9,
-    destinationCountry: "ES",
-  },
-  {
-    id: "SHP-2002",
-    clientId: "BloomSkin Labs",
-    originWarehouse: "zaragoza",
-    carrier: "EuroRoad",
-    status: "in-transit",
-    estimatedDeliveryDate: "2026-05-07T16:30:00.000Z",
-    actualDeliveryDate: undefined,
-    weightKg: 31.4,
-    destinationCountry: "FR",
+    id: "CAR-DHL",
+    name: "DHL Express",
+    operatesIn: ["United States", "Spain"],
+    baseRateUSD: 12.0,
+    ratePerKgUSD: 2.0,
+    ratePerKmUSD: 0.1,
+    avgDeliveryDays: 1,
+    onTimeRate: 95,
+    maxWeightKg: 50,
+    handlesFragile: true,
+    acceptsPriority: ["Express", "Same-day"],
   },
 ];
 
-const warehouseItems: WarehouseItem[] = [
+const sampleShipment: Shipment = {
+  id: "SH-2024-8821",
+  sku: "LAPTOP-DELL-15",
+  quantity: 1,
+  origin: "Zaragoza",
+  destination: {
+    city: "Madrid",
+    country: "Spain",
+    postalCode: "28001",
+    distanceKm: 320,
+  },
+  priority: "Express",
+  declaredValueUSD: 650.0,
+  carrier: null,
+  status: "Pending",
+  createdAt: new Date("2024-03-15"),
+};
+
+const additionalShipments: Shipment[] = [
   {
-    id: "ITM-01",
-    sku: "FASH-TSHIRT-001",
-    name: "Premium Cotton Tee",
-    category: "fashion",
-    quantity: 320,
-    warehouseLocation: "los-angeles",
-    lastUpdatedDate: "2026-04-28T08:30:00.000Z",
+    id: "SH-2024-8822",
+    sku: "SHOE-BLK-42",
+    quantity: 2,
+    origin: "Los Angeles",
+    destination: {
+      city: "San Diego",
+      country: "United States",
+      postalCode: "92101",
+      distanceKm: 195,
+    },
+    priority: "Standard",
+    declaredValueUSD: 70.0,
+    carrier: "UPS",
+    status: "Delivered",
+    createdAt: new Date("2024-03-16"),
   },
   {
-    id: "ITM-02",
-    sku: "ELEC-EARBUD-210",
-    name: "Wireless Earbuds Pro",
-    category: "electronics",
-    quantity: 140,
-    warehouseLocation: "los-angeles",
-    lastUpdatedDate: "2026-04-28T09:10:00.000Z",
-  },
-  {
-    id: "ITM-03",
-    sku: "COSM-SERUM-080",
-    name: "Hydra Glow Serum",
-    category: "cosmetics",
-    quantity: 500,
-    warehouseLocation: "zaragoza",
-    lastUpdatedDate: "2026-04-28T10:15:00.000Z",
-  },
-  {
-    id: "ITM-04",
-    sku: "FOOD-BAR-030",
-    name: "Protein Snack Bar",
-    category: "food",
-    quantity: 900,
-    warehouseLocation: "zaragoza",
-    lastUpdatedDate: "2026-04-28T11:20:00.000Z",
+    id: "SH-2024-8823",
+    sku: "PERFUME-COCO-50",
+    quantity: 1,
+    origin: "Los Angeles",
+    destination: {
+      city: "Barcelona",
+      country: "Spain",
+      postalCode: "08001",
+      distanceKm: 6120,
+    },
+    priority: "Express",
+    declaredValueUSD: 85.0,
+    carrier: "DHL Express",
+    status: "In transit",
+    createdAt: new Date("2024-03-17"),
   },
 ];
 
-const sortedClients = collections.sortClientsByName(clients, "asc");
-const targetEmail = "team@bloomskin.com";
-const targetCompany = "Circuit Nest";
-const invalidClient = clients.find((client) => client.companyName === "MonoCos") ?? null;
-const lowVolumeClient = clients.find(
-  (client) => client.companyName === "FreshCrate Market"
-) ?? null;
+const allShipments: Shipment[] = [sampleShipment, ...additionalShipments];
 
-console.log("1. US clients:", collections.filterClientsByCountry(clients, "US"));
-console.log("2. Clients sorted by name (asc):", sortedClients);
-console.log(
-  "3. Linear search by email:",
-  search.linearSearchClientByEmail(clients, targetEmail)
-);
-console.log(
-  "4. Binary search index by company on sorted clients:",
-  search.binarySearchClientByCompany(sortedClients, targetCompany)
-);
-console.log(
-  "5. Clients by product type:",
-  transformations.countClientsByProductType(clients)
-);
-console.log("6. Generated client report:", transformations.generateClientReport(clients, shipments));
-console.log(
-  "7. Invalid client validation errors:",
-  invalidClient ? validations.validateClient(invalidClient).errors : ["Invalid client sample not found"]
-);
-console.log(
-  "8. Low-volume warning:",
-  lowVolumeClient ? validations.isLowVolumeWarning(lowVolumeClient) : false
+const inventoryMovements: InventoryMovement[] = [
+  {
+    id: "MOV-001",
+    sku: "LAPTOP-DELL-15",
+    warehouse: "Zaragoza",
+    type: "Inbound",
+    quantity: 20,
+    reason: "Supplier restock",
+    timestamp: new Date("2024-03-10T09:00:00Z"),
+  },
+  {
+    id: "MOV-002",
+    sku: "LAPTOP-DELL-15",
+    warehouse: "Zaragoza",
+    type: "Outbound",
+    quantity: 8,
+    reason: "Customer orders",
+    timestamp: new Date("2024-03-14T12:30:00Z"),
+  },
+  {
+    id: "MOV-003",
+    sku: "LAPTOP-DELL-15",
+    warehouse: "Zaragoza",
+    type: "Adjustment",
+    quantity: 1,
+    reason: "Cycle count correction",
+    timestamp: new Date("2024-03-15T18:45:00Z"),
+  },
+];
+
+function generateLowStockAlert(products: Product[]): string {
+  const lowStock: Product[] = filterLowStockProducts(products);
+
+  if (lowStock.length === 0) {
+    return "No low-stock products at the moment.";
+  }
+
+  return lowStock
+    .map(
+      (product: Product) =>
+        `⚠️  LOW STOCK ALERT — ${product.sku}: ${product.stockQuantity} units (min: ${product.minStockThreshold})`
+    )
+    .join("\n");
+}
+
+const dhlCarrier: Carrier =
+  sampleCarriers.find((carrier: Carrier) => carrier.id === "CAR-DHL") ?? sampleCarriers[0];
+
+const sampleShipmentProduct: Product =
+  findProductBySKU(sampleProducts, sampleShipment.sku) ?? sampleProducts[0];
+
+const productsSortedByWeight: Product[] = [...sampleProducts].sort(
+  (a: Product, b: Product) => a.weightKg - b.weightKg
 );
 
-void warehouseItems;
+const targetWeight: number = sampleShipmentProduct.weightKg;
+
+const carrierScores: Array<{ carrier: string; score: number }> = sampleCarriers.map(
+  (carrier: Carrier) => ({
+    carrier: carrier.name,
+    score: scoreCarrierForShipment(carrier, sampleShipment, sampleShipmentProduct),
+  })
+);
+
+const bestCarrier = selectBestCarrier(sampleCarriers, sampleShipment, sampleShipmentProduct);
+
+const groupedShipments = groupShipmentsByStatus(allShipments);
+const groupedShipmentCounts = Object.fromEntries(
+  Object.entries(groupedShipments).map(([status, items]: [string, Shipment[]]) => [
+    status,
+    items.length,
+  ])
+);
+
+const invalidProduct: Product = {
+  ...sampleProducts[0],
+  sku: "",
+  weightKg: -1,
+  unitCostUSD: 0,
+};
+
+const invalidCarrier: Carrier = {
+  ...sampleCarriers[0],
+  onTimeRate: 150,
+  operatesIn: [],
+};
+
+console.log("Inventory movements (LAPTOP-DELL-15):", inventoryMovements);
+console.log(
+  "1. filterProductsByWarehouse (Los Angeles):",
+  filterProductsByWarehouse(sampleProducts, "Los Angeles")
+);
+console.log("2. filterLowStockProducts:", filterLowStockProducts(sampleProducts));
+console.log(
+  "3. sortCarriersByReliability (desc):",
+  sortCarriersByReliability(sampleCarriers, "desc")
+);
+console.log(
+  "4. findProductBySKU (laptop-dell-15):",
+  findProductBySKU(sampleProducts, "laptop-dell-15")
+);
+console.log(
+  "5. binarySearchProductByWeight (on weight-sorted products):",
+  binarySearchProductByWeight(productsSortedByWeight, targetWeight)
+);
+console.log(
+  "6. calculateShippingCost (sample shipment with DHL):",
+  calculateShippingCost(sampleShipment, sampleShipmentProduct, dhlCarrier)
+);
+console.log("7. scoreCarrierForShipment (all carriers):", carrierScores);
+console.log(
+  "8. selectBestCarrier (winner):",
+  bestCarrier
+    ? {
+        winner: bestCarrier.carrier.name,
+        score: bestCarrier.score,
+        cost: bestCarrier.cost,
+      }
+    : null
+);
+console.log("9. countProductsByCategory:", countProductsByCategory(sampleProducts));
+console.log(
+  "10. calculateTotalInventoryValue:",
+  calculateTotalInventoryValue(sampleProducts)
+);
+console.log("11. groupShipmentsByStatus (counts):", groupedShipmentCounts);
+console.log("12. findTopCarriers (topN = 2):", findTopCarriers(allShipments, 2));
+console.log("13. validateProduct (invalid product):", validateProduct(invalidProduct));
+console.log("14. validateCarrier (invalid carrier):", validateCarrier(invalidCarrier));
+console.log("BONUS. generateLowStockAlert:\n" + generateLowStockAlert(sampleProducts));
+
+// ===== BONUS UTILITIES SECTION =====
+const sampleMovements: InventoryMovement[] = [
+  {
+    id: "MOV-001",
+    sku: "LAPTOP-DELL-15",
+    warehouse: "Zaragoza",
+    type: "Inbound",
+    quantity: 15,
+    reason: "Restock from supplier",
+    timestamp: new Date("2024-03-10"),
+  },
+  {
+    id: "MOV-002",
+    sku: "LAPTOP-DELL-15",
+    warehouse: "Zaragoza",
+    type: "Outbound",
+    quantity: 3,
+    reason: "Order fulfillment",
+    timestamp: new Date("2024-03-12"),
+  },
+  {
+    id: "MOV-003",
+    sku: "SHOE-BLK-42",
+    warehouse: "Los Angeles",
+    type: "Adjustment",
+    quantity: 40,
+    reason: "Stock count correction",
+    timestamp: new Date("2024-03-14"),
+  },
+];
+
+const laptopProduct: Product =
+  findProductBySKU(sampleProducts, "LAPTOP-DELL-15") ?? sampleProducts[0];
+const inboundMovement: InventoryMovement = sampleMovements[0];
+const inboundAppliedProduct: Product = applyInventoryMovement(
+  laptopProduct,
+  inboundMovement
+);
+
+console.log("BONUS 1 — applyInventoryMovement (MOV-001 Inbound +15):", {
+  before: {
+    stockQuantity: laptopProduct.stockQuantity,
+    status: laptopProduct.status,
+  },
+  after: {
+    stockQuantity: inboundAppliedProduct.stockQuantity,
+    status: inboundAppliedProduct.status,
+  },
+});
+
+const sequentialMovements: InventoryMovement[] = [sampleMovements[0], sampleMovements[1]];
+const multiAppliedProduct: Product = applyMultipleMovements(
+  laptopProduct,
+  sequentialMovements
+);
+
+console.log("BONUS 2 — applyMultipleMovements final stockQuantity:", {
+  stockQuantity: multiAppliedProduct.stockQuantity,
+});
+
+const stockProjection = projectStockLevel(laptopProduct, 1.5, 10);
+console.log("BONUS 3 — projectStockLevel (1.5/day, 10 days):", stockProjection);
+
+console.log("BONUS 4 — getMovementSummary:", getMovementSummary(sampleMovements));
+
+const zaragozaReport = generateWarehouseReport(
+  sampleProducts,
+  allShipments,
+  sampleMovements,
+  "Zaragoza"
+);
+
+console.log("BONUS 5 — generateWarehouseReport (Zaragoza):", zaragozaReport);
+console.log("BONUS 6 — formatReportAsText:\n" + formatReportAsText(zaragozaReport));
