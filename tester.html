@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TrackFlow — Data Utilities Tester</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 text-slate-900 antialiased">
+  <a
+    href="#main"
+    class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-[#0f172a]"
+  >
+    Skip to main content
+  </a>
+
+  <header class="bg-[#0f172a] text-white shadow-md">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-5 sm:px-6 lg:px-8">
+      <h1 class="text-xl font-bold sm:text-2xl">TrackFlow — Data Utilities Tester</h1>
+      <span class="rounded-full border border-orange-300/40 bg-orange-500/20 px-3 py-1 text-xs font-semibold text-orange-200">
+        Milestone Playground
+      </span>
+    </div>
+  </header>
+
+  <main id="main" class="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:px-8">
+    <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+      <div class="mb-4 flex items-center justify-between gap-3">
+        <h2 class="text-lg font-semibold text-[#0f172a] sm:text-xl">Filters</h2>
+        <span class="h-2 w-16 rounded-full bg-[#f97316]"></span>
+      </div>
+
+      <div class="grid gap-4 md:grid-cols-2">
+        <div class="space-y-2">
+          <label for="countryFilter" class="text-sm font-medium text-slate-700">Filter by country</label>
+          <div class="flex gap-2">
+            <select id="countryFilter" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200">
+              <option value="US">US</option>
+              <option value="ES">ES</option>
+              <option value="BOTH">BOTH</option>
+              <option value="OTHER">OTHER</option>
+            </select>
+            <button id="runCountryFilter" class="rounded-md bg-[#f97316] px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-300">
+              Run Filter
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label for="serviceFilter" class="text-sm font-medium text-slate-700">Filter by service</label>
+          <div class="flex gap-2">
+            <select id="serviceFilter" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200">
+              <option value="warehousing">warehousing</option>
+              <option value="last-mile">last-mile</option>
+              <option value="reverse">reverse</option>
+            </select>
+            <button id="runServiceFilter" class="rounded-md bg-[#f97316] px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-300">
+              Run Filter
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="filtersOutput" class="mt-4 rounded-md border border-slate-200 bg-slate-50 p-4" aria-live="polite"></div>
+    </section>
+
+    <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+      <div class="mb-4 flex items-center justify-between gap-3">
+        <h2 class="text-lg font-semibold text-[#0f172a] sm:text-xl">Search</h2>
+        <span class="h-2 w-16 rounded-full bg-[#f97316]"></span>
+      </div>
+
+      <div class="grid gap-4 md:grid-cols-2">
+        <div class="space-y-2">
+          <label for="emailSearch" class="text-sm font-medium text-slate-700">Linear Search by Email</label>
+          <div class="flex gap-2">
+            <input id="emailSearch" type="email" placeholder="team@bloomskin.com" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200" />
+            <button id="runLinearEmail" class="rounded-md bg-[#f97316] px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-300">
+              Search
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label for="companySearch" class="text-sm font-medium text-slate-700">Binary Search by Company</label>
+          <div class="flex gap-2">
+            <input id="companySearch" type="text" placeholder="Circuit Nest" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200" />
+            <button id="runBinaryCompany" class="rounded-md bg-[#f97316] px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-300">
+              Search
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="searchOutput" class="mt-4 rounded-md border border-slate-200 bg-slate-50 p-4" aria-live="polite"></div>
+    </section>
+
+    <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+      <div class="mb-4 flex items-center justify-between gap-3">
+        <h2 class="text-lg font-semibold text-[#0f172a] sm:text-xl">Aggregations</h2>
+        <span class="h-2 w-16 rounded-full bg-[#f97316]"></span>
+      </div>
+
+      <div class="flex flex-wrap gap-2">
+        <button id="runReport" class="rounded-md bg-[#f97316] px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-300">Generate Report</button>
+        <button id="runProductBreakdown" class="rounded-md bg-[#0f172a] px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300">Clients by Product Type</button>
+        <button id="runHeaviest" class="rounded-md bg-[#0f172a] px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300">Heaviest Shipment</button>
+        <button id="runLightest" class="rounded-md bg-[#0f172a] px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300">Lightest Shipment</button>
+      </div>
+
+      <pre id="reportOutput" class="mt-4 overflow-x-auto rounded-md border border-slate-200 bg-slate-50 p-4 text-xs sm:text-sm" aria-live="polite"></pre>
+      <div id="productTypeOutput" class="mt-4 space-y-2" aria-live="polite"></div>
+      <div id="shipmentOutput" class="mt-4 rounded-md border border-slate-200 bg-slate-50 p-4" aria-live="polite"></div>
+    </section>
+
+    <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+      <div class="mb-4 flex items-center justify-between gap-3">
+        <h2 class="text-lg font-semibold text-[#0f172a] sm:text-xl">Validations</h2>
+        <span class="h-2 w-16 rounded-full bg-[#f97316]"></span>
+      </div>
+
+      <form id="validationForm" class="grid gap-4 md:grid-cols-2" novalidate>
+        <div>
+          <label for="vCompanyName" class="mb-1 block text-sm font-medium text-slate-700">Company name</label>
+          <input id="vCompanyName" type="text" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200" aria-describedby="vCompanyNameError" />
+          <p id="vCompanyNameError" class="mt-1 text-sm text-red-600" aria-live="polite"></p>
+        </div>
+
+        <div>
+          <label for="vContactPerson" class="mb-1 block text-sm font-medium text-slate-700">Contact person</label>
+          <input id="vContactPerson" type="text" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200" aria-describedby="vContactPersonError" />
+          <p id="vContactPersonError" class="mt-1 text-sm text-red-600" aria-live="polite"></p>
+        </div>
+
+        <div>
+          <label for="vEmail" class="mb-1 block text-sm font-medium text-slate-700">Corporate email</label>
+          <input id="vEmail" type="email" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200" aria-describedby="vEmailError" />
+          <p id="vEmailError" class="mt-1 text-sm text-red-600" aria-live="polite"></p>
+        </div>
+
+        <div>
+          <label for="vPhone" class="mb-1 block text-sm font-medium text-slate-700">Phone</label>
+          <input id="vPhone" type="text" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200" aria-describedby="vPhoneError" />
+          <p id="vPhoneError" class="mt-1 text-sm text-red-600" aria-live="polite"></p>
+        </div>
+
+        <div class="md:col-span-2">
+          <button type="submit" class="rounded-md bg-[#f97316] px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-300">
+            Validate
+          </button>
+        </div>
+      </form>
+
+      <div class="mt-5 rounded-md border border-slate-200 bg-slate-50 p-4">
+        <label for="lowVolumeToggle" class="flex items-center gap-2 text-sm font-medium text-slate-700">
+          <input id="lowVolumeToggle" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-orange-600 focus:ring-orange-300" />
+          Low Volume Warning (0-100)
+        </label>
+        <p id="lowVolumeMessage" class="mt-2 hidden rounded-md border border-orange-300 bg-orange-50 p-3 text-sm text-orange-800" aria-live="polite">
+          For volumes under 100 monthly shipments, our services might not be the most efficient solution. Are you sure you want to continue?
+        </p>
+      </div>
+
+      <div id="validationStatus" class="mt-4" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script>
+    const clients = [
+      {
+        companyName: "Aster Fashion Co",
+        contactPerson: "Mia Carter",
+        corporateEmail: "ops@asterfashion.com",
+        phone: "+1 213 555 0101",
+        website: "https://asterfashion.com",
+        operatingCountry: "US",
+        productType: "fashion",
+        monthlyShippingVolume: "101-500",
+        servicesOfInterest: ["warehousing", "last-mile"],
+        current3PL: "yes",
+        comments: "Needs same-day options in LA.",
+      },
+      {
+        companyName: "VoltEdge Electronics",
+        contactPerson: "Luis Navarro",
+        corporateEmail: "contact@voltedge.io",
+        phone: "+34 976 555 102",
+        website: "https://voltedge.io",
+        operatingCountry: "ES",
+        productType: "electronics",
+        monthlyShippingVolume: "501-2000",
+        servicesOfInterest: ["last-mile", "reverse"],
+        current3PL: "evaluating",
+      },
+      {
+        companyName: "BloomSkin Labs",
+        contactPerson: "Nora Blake",
+        corporateEmail: "team@bloomskin.com",
+        phone: "+1 323 555 0199",
+        operatingCountry: "BOTH",
+        productType: "cosmetics",
+        monthlyShippingVolume: "2000+",
+        servicesOfInterest: ["warehousing", "reverse"],
+        current3PL: "no",
+      },
+      {
+        companyName: "FreshCrate Market",
+        contactPerson: "Pablo Ortiz",
+        corporateEmail: "hello@freshcrate.es",
+        phone: "+34 640 555 778",
+        operatingCountry: "OTHER",
+        productType: "food",
+        monthlyShippingVolume: "0-100",
+        servicesOfInterest: ["warehousing"],
+        current3PL: "no",
+      },
+      {
+        companyName: "Circuit Nest",
+        contactPerson: "Emma Reed",
+        corporateEmail: "logistics@circuitnest.com",
+        phone: "+1 562 555 0188",
+        website: "https://circuitnest.com",
+        operatingCountry: "US",
+        productType: "electronics",
+        monthlyShippingVolume: "not-sure",
+        servicesOfInterest: ["last-mile"],
+        current3PL: "yes",
+      },
+      {
+        companyName: "MonoCos",
+        contactPerson: "Alex",
+        corporateEmail: "",
+        phone: "+1 424 555 0177",
+        operatingCountry: "US",
+        productType: "cosmetics",
+        monthlyShippingVolume: "0-100",
+        servicesOfInterest: ["reverse"],
+        current3PL: "evaluating",
+        comments: "Potential pilot account.",
+      },
+    ];
+
+    const shipments = [
+      {
+        id: "SHP-1001",
+        clientId: "Aster Fashion Co",
+        originWarehouse: "los-angeles",
+        carrier: "SwiftShip",
+        status: "in-transit",
+        estimatedDeliveryDate: "2026-05-05T12:00:00.000Z",
+        actualDeliveryDate: undefined,
+        weightKg: 42.5,
+        destinationCountry: "US",
+      },
+      {
+        id: "SHP-1002",
+        clientId: "Circuit Nest",
+        originWarehouse: "los-angeles",
+        carrier: "ParcelFly",
+        status: "delivered",
+        estimatedDeliveryDate: "2026-05-03T10:00:00.000Z",
+        actualDeliveryDate: "2026-05-03T09:32:00.000Z",
+        weightKg: 18.2,
+        destinationCountry: "US",
+      },
+      {
+        id: "SHP-2001",
+        clientId: "VoltEdge Electronics",
+        originWarehouse: "zaragoza",
+        carrier: "IberiaExpress",
+        status: "processing",
+        estimatedDeliveryDate: "2026-05-06T15:00:00.000Z",
+        actualDeliveryDate: undefined,
+        weightKg: 55.9,
+        destinationCountry: "ES",
+      },
+      {
+        id: "SHP-2002",
+        clientId: "BloomSkin Labs",
+        originWarehouse: "zaragoza",
+        carrier: "EuroRoad",
+        status: "in-transit",
+        estimatedDeliveryDate: "2026-05-07T16:30:00.000Z",
+        actualDeliveryDate: undefined,
+        weightKg: 31.4,
+        destinationCountry: "FR",
+      },
+    ];
+
+    const warehouseItems = [
+      {
+        id: "ITM-01",
+        sku: "FASH-TSHIRT-001",
+        name: "Premium Cotton Tee",
+        category: "fashion",
+        quantity: 320,
+        warehouseLocation: "los-angeles",
+        lastUpdatedDate: "2026-04-28T08:30:00.000Z",
+      },
+      {
+        id: "ITM-02",
+        sku: "ELEC-EARBUD-210",
+        name: "Wireless Earbuds Pro",
+        category: "electronics",
+        quantity: 140,
+        warehouseLocation: "los-angeles",
+        lastUpdatedDate: "2026-04-28T09:10:00.000Z",
+      },
+      {
+        id: "ITM-03",
+        sku: "COSM-SERUM-080",
+        name: "Hydra Glow Serum",
+        category: "cosmetics",
+        quantity: 500,
+        warehouseLocation: "zaragoza",
+        lastUpdatedDate: "2026-04-28T10:15:00.000Z",
+      },
+      {
+        id: "ITM-04",
+        sku: "FOOD-BAR-030",
+        name: "Protein Snack Bar",
+        category: "food",
+        quantity: 900,
+        warehouseLocation: "zaragoza",
+        lastUpdatedDate: "2026-04-28T11:20:00.000Z",
+      },
+    ];
+
+    function filterClientsByCountry(clientList, country) {
+      return clientList.filter((client) => client.operatingCountry === country);
+    }
+
+    function filterClientsByService(clientList, service) {
+      return clientList.filter((client) =>
+        client.servicesOfInterest.some((serviceItem) => serviceItem === service)
+      );
+    }
+
+    function sortClientsByName(clientList, order) {
+      const direction = order === "asc" ? 1 : -1;
+      return [...clientList].sort((a, b) =>
+        a.companyName.localeCompare(b.companyName) * direction
+      );
+    }
+
+    function linearSearchClientByEmail(clientList, email) {
+      for (const client of clientList) {
+        if (client.corporateEmail === email) {
+          return client;
+        }
+      }
+      return null;
+    }
+
+    function binarySearchClientByCompany(sortedClients, companyName) {
+      let left = 0;
+      let right = sortedClients.length - 1;
+
+      while (left <= right) {
+        const mid = Math.floor((left + right) / 2);
+        const comparison = sortedClients[mid].companyName.localeCompare(companyName);
+
+        if (comparison === 0) {
+          return mid;
+        }
+
+        if (comparison < 0) {
+          left = mid + 1;
+        } else {
+          right = mid - 1;
+        }
+      }
+
+      return -1;
+    }
+
+    function countClientsByProductType(clientList) {
+      return clientList.reduce((acc, client) => {
+        const key = client.productType;
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      }, {});
+    }
+
+    function findHeaviestShipment(shipmentList) {
+      return shipmentList.reduce((heaviest, shipment) => {
+        if (!heaviest || shipment.weightKg > heaviest.weightKg) {
+          return shipment;
+        }
+        return heaviest;
+      }, null);
+    }
+
+    function findLightestShipment(shipmentList) {
+      return shipmentList.reduce((lightest, shipment) => {
+        if (!lightest || shipment.weightKg < lightest.weightKg) {
+          return shipment;
+        }
+        return lightest;
+      }, null);
+    }
+
+    function generateClientReport(clientList, shipmentList) {
+      const baseCountries = { US: 0, ES: 0, BOTH: 0, OTHER: 0 };
+      const baseProductTypes = { fashion: 0, electronics: 0, cosmetics: 0, food: 0, other: 0 };
+      const baseVolumes = {
+        "0-100": 0,
+        "101-500": 0,
+        "501-2000": 0,
+        "2000+": 0,
+        "not-sure": 0,
+      };
+
+      const clientsByCountry = clientList.reduce((acc, client) => {
+        acc[client.operatingCountry] += 1;
+        return acc;
+      }, { ...baseCountries });
+
+      const clientsByProductType = clientList.reduce((acc, client) => {
+        acc[client.productType] += 1;
+        return acc;
+      }, { ...baseProductTypes });
+
+      const clientsByVolumeRange = clientList.reduce((acc, client) => {
+        acc[client.monthlyShippingVolume] += 1;
+        return acc;
+      }, { ...baseVolumes });
+
+      return {
+        generatedDate: new Date().toISOString(),
+        totalClients: clientList.length,
+        clientsByCountry,
+        clientsByProductType,
+        clientsByVolumeRange,
+        averageShipmentsPerClient:
+          clientList.length === 0 ? 0 : shipmentList.length / clientList.length,
+      };
+    }
+
+    function validateClient(client) {
+      const errors = [];
+      const byField = {
+        companyName: [],
+        contactPerson: [],
+        corporateEmail: [],
+        phone: [],
+      };
+
+      if (!client.companyName || client.companyName.trim().length < 2) {
+        const message = "Company name must have at least 2 characters";
+        errors.push(message);
+        byField.companyName.push(message);
+      }
+
+      const words = (client.contactPerson || "").trim().split(/\s+/).filter(Boolean);
+      if (words.length < 2) {
+        const message = "Enter first and last name of contact";
+        errors.push(message);
+        byField.contactPerson.push(message);
+      }
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((client.corporateEmail || "").trim())) {
+        const message = "Enter a valid corporate email (example: name@company.com)";
+        errors.push(message);
+        byField.corporateEmail.push(message);
+      }
+
+      if (!/^\+\d[\d\s().-]*$/.test((client.phone || "").trim())) {
+        const message = "Phone must include country code (example: +1 213 555 0147)";
+        errors.push(message);
+        byField.phone.push(message);
+      }
+
+      return {
+        valid: errors.length === 0,
+        errors,
+        byField,
+      };
+    }
+
+    function isLowVolumeWarning(client) {
+      return client.monthlyShippingVolume === "0-100";
+    }
+
+    function clientCard(client) {
+      return `
+        <article class="rounded-md border border-slate-200 bg-white p-3">
+          <p class="font-semibold text-slate-900">${client.companyName}</p>
+          <p class="text-sm text-slate-600">Country: ${client.operatingCountry}</p>
+        </article>
+      `;
+    }
+
+    function shipmentCard(shipment) {
+      if (!shipment) {
+        return "<p class=\"text-sm text-slate-600\">Not found</p>";
+      }
+      return `
+        <article class="rounded-md border border-slate-200 bg-white p-3">
+          <p class="font-semibold text-slate-900">${shipment.id}</p>
+          <p class="text-sm text-slate-600">Warehouse: ${shipment.originWarehouse}</p>
+          <p class="text-sm text-slate-600">Weight: ${shipment.weightKg} kg</p>
+        </article>
+      `;
+    }
+
+    const filtersOutput = document.getElementById("filtersOutput");
+    const searchOutput = document.getElementById("searchOutput");
+    const reportOutput = document.getElementById("reportOutput");
+    const productTypeOutput = document.getElementById("productTypeOutput");
+    const shipmentOutput = document.getElementById("shipmentOutput");
+    const validationStatus = document.getElementById("validationStatus");
+
+    document.getElementById("runCountryFilter").addEventListener("click", () => {
+      const country = document.getElementById("countryFilter").value;
+      const result = filterClientsByCountry(clients, country);
+
+      if (result.length === 0) {
+        filtersOutput.innerHTML = "<p class='text-sm text-slate-600'>No clients found.</p>";
+        return;
+      }
+
+      filtersOutput.innerHTML = `<div class="grid gap-2 sm:grid-cols-2">${result
+        .map(clientCard)
+        .join("")}</div>`;
+    });
+
+    document.getElementById("runServiceFilter").addEventListener("click", () => {
+      const service = document.getElementById("serviceFilter").value;
+      const result = filterClientsByService(clients, service);
+
+      if (result.length === 0) {
+        filtersOutput.innerHTML = "<p class='text-sm text-slate-600'>No clients found.</p>";
+        return;
+      }
+
+      filtersOutput.innerHTML = `<div class="grid gap-2 sm:grid-cols-2">${result
+        .map(clientCard)
+        .join("")}</div>`;
+    });
+
+    const sortedClients = sortClientsByName(clients, "asc");
+
+    document.getElementById("runLinearEmail").addEventListener("click", () => {
+      const email = document.getElementById("emailSearch").value.trim();
+      const result = linearSearchClientByEmail(clients, email);
+
+      searchOutput.innerHTML = result
+        ? clientCard(result)
+        : "<p class='text-sm text-slate-600'>Not found</p>";
+    });
+
+    document.getElementById("runBinaryCompany").addEventListener("click", () => {
+      const company = document.getElementById("companySearch").value.trim();
+      const index = binarySearchClientByCompany(sortedClients, company);
+
+      searchOutput.innerHTML =
+        index >= 0
+          ? `<p class="mb-2 text-sm text-slate-600">Index in sorted array: ${index}</p>${clientCard(sortedClients[index])}`
+          : "<p class='text-sm text-slate-600'>Not found</p>";
+    });
+
+    document.getElementById("runReport").addEventListener("click", () => {
+      const report = generateClientReport(clients, shipments);
+      reportOutput.textContent = JSON.stringify(report, null, 2);
+    });
+
+    document.getElementById("runProductBreakdown").addEventListener("click", () => {
+      const counts = countClientsByProductType(clients);
+      const maxValue = Math.max(...Object.values(counts), 1);
+
+      productTypeOutput.innerHTML = Object.entries(counts)
+        .map(([type, value]) => {
+          const width = Math.round((value / maxValue) * 100);
+          return `
+            <div>
+              <div class="mb-1 flex justify-between text-sm">
+                <span class="font-medium text-slate-700">${type}</span>
+                <span class="text-slate-600">${value}</span>
+              </div>
+              <div class="h-2 w-full rounded bg-slate-200">
+                <div class="h-2 rounded bg-[#f97316]" style="width: ${width}%"></div>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+    });
+
+    document.getElementById("runHeaviest").addEventListener("click", () => {
+      shipmentOutput.innerHTML = shipmentCard(findHeaviestShipment(shipments));
+    });
+
+    document.getElementById("runLightest").addEventListener("click", () => {
+      shipmentOutput.innerHTML = shipmentCard(findLightestShipment(shipments));
+    });
+
+    document.getElementById("validationForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const data = {
+        companyName: document.getElementById("vCompanyName").value,
+        contactPerson: document.getElementById("vContactPerson").value,
+        corporateEmail: document.getElementById("vEmail").value,
+        phone: document.getElementById("vPhone").value,
+      };
+
+      const result = validateClient(data);
+
+      const fieldErrors = {
+        vCompanyNameError: result.byField.companyName,
+        vContactPersonError: result.byField.contactPerson,
+        vEmailError: result.byField.corporateEmail,
+        vPhoneError: result.byField.phone,
+      };
+
+      Object.entries(fieldErrors).forEach(([id, messages]) => {
+        const element = document.getElementById(id);
+        element.textContent = messages.join(" ");
+      });
+
+      if (result.valid) {
+        validationStatus.innerHTML =
+          '<p class="rounded-md border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-700">Client mini-form is valid.</p>';
+      } else {
+        validationStatus.innerHTML =
+          '<p class="rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-700">Please fix the highlighted validation errors.</p>';
+      }
+    });
+
+    document.getElementById("lowVolumeToggle").addEventListener("change", (event) => {
+      const warning = document.getElementById("lowVolumeMessage");
+      const mockClient = {
+        monthlyShippingVolume: event.target.checked ? "0-100" : "101-500",
+      };
+
+      warning.classList.toggle("hidden", !isLowVolumeWarning(mockClient));
+    });
+
+    void warehouseItems;
+  </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "trackflow-typescript-utils",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "demo": "npx tsx src/demo.ts"
+  },
+  "dependencies": {
+    "typescript": "^6.0.3"
+  }
+}
